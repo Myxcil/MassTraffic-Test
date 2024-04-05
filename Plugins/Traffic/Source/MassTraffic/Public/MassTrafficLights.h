@@ -4,7 +4,6 @@
 
 #include "Engine/DataAsset.h"
 #include "Engine/DataTable.h"
-#include "MassLODSubsystem.h"
 #include "MassRepresentationTypes.h"
 
 #include "MassTrafficLights.generated.h"

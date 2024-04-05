@@ -1,8 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficLights.h"
+
+#include "EngineUtils.h"
 #include "MassTraffic.h"
 #include "MassTrafficDebugHelpers.h"
+#include "MassTrafficLightActor.h"
 #include "Kismet/GameplayStatics.h"
 
 #if WITH_EDITOR
@@ -193,7 +196,7 @@ void UMassTrafficLightInstancesDataAsset::PopulateTrafficLightsFromPointCloud()
 		else
 		{
 			UE_LOG(LogMassTraffic, Warning, TEXT("Couldn't find matching traffic traffic light type for unreal_instance: %s. Using a random traffic light type instead."), *UnrealInstance);
-			TrafficLightTypeIndex = FMath::RandHelper(NumTrafficLights);
+			TrafficLightTypeIndex = FMath::RandHelper(TrafficLightTypesData->TrafficLightTypes.Num());
 		}
 
 		
@@ -233,24 +236,26 @@ void UMassTrafficLightInstancesDataAsset::PopulateTrafficLightsFromMap()
 	TrafficLights.Empty();
 	NumTrafficLights = 0;
 
-	NumTrafficLights = TrafficLights.Num();
+	const UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+	ensure(World);
 
-	const UWorld* World = GetWorld();
-
-	TArray<AActor*> AllTrafficLightActors;
-	UGameplayStatics::GetAllActorsWithTag(World, "TrafficLight", AllTrafficLightActors);
-
-	for(const AActor* Actor : AllTrafficLightActors)
+	// Iterate over all proxy actors and create the data similar to the point cloud 
+	for(TActorIterator<AMassTrafficLightActor> It(World); It; ++It)
 	{
-		const FTransform& Transform = Actor->GetTransform(); 
+		const FTransform& Transform = It->GetTransform(); 
 		
-		uint8 TrafficLightTypeIndex = 0;
+		int16 TrafficLightTypeIndex = It->GetTrafficLightTypeIndex();
+		if (TrafficLightTypeIndex == INDEX_NONE)
+		{
+			TrafficLightTypeIndex = FMath::RandHelper(TrafficLightTypesData->TrafficLightTypes.Num());
+		}
+
 		const FVector ControlledIntersectionSideMidpoint = Transform.GetLocation();
 
 		const FVector TrafficLightPosition = Transform.GetLocation();
 		const FQuat TrafficLightRotation = Transform.GetRotation();
-		
-		float TrafficLightZRotation = 0.0f;
+	
+		float TrafficLightZRotation;
 		FVector TrafficLightXDirection_Debug = FVector::ZeroVector;
 		{
 			const FRotator Rotator(TrafficLightRotation);
@@ -270,6 +275,8 @@ void UMassTrafficLightInstancesDataAsset::PopulateTrafficLightsFromMap()
 		}
 #endif
 	}
+
+	NumTrafficLights = TrafficLights.Num();
 	
 	Modify();
 }
