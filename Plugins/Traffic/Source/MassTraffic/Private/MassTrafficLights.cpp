@@ -3,6 +3,7 @@
 #include "MassTrafficLights.h"
 #include "MassTraffic.h"
 #include "MassTrafficDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 #if WITH_EDITOR
 #include "Misc/DefaultValueHelper.h"
@@ -224,6 +225,52 @@ void UMassTrafficLightInstancesDataAsset::PopulateTrafficLightsFromPointCloud()
 	NumTrafficLights = TrafficLights.Num();
 
 	// Dirty the actor
+	Modify();
+}
+
+void UMassTrafficLightInstancesDataAsset::PopulateTrafficLightsFromMap()
+{
+	TrafficLights.Empty();
+	NumTrafficLights = 0;
+
+	NumTrafficLights = TrafficLights.Num();
+
+	const UWorld* World = GetWorld();
+
+	TArray<AActor*> AllTrafficLightActors;
+	UGameplayStatics::GetAllActorsWithTag(World, "TrafficLight", AllTrafficLightActors);
+
+	for(const AActor* Actor : AllTrafficLightActors)
+	{
+		const FTransform& Transform = Actor->GetTransform(); 
+		
+		uint8 TrafficLightTypeIndex = 0;
+		const FVector ControlledIntersectionSideMidpoint = Transform.GetLocation();
+
+		const FVector TrafficLightPosition = Transform.GetLocation();
+		const FQuat TrafficLightRotation = Transform.GetRotation();
+		
+		float TrafficLightZRotation = 0.0f;
+		FVector TrafficLightXDirection_Debug = FVector::ZeroVector;
+		{
+			const FRotator Rotator(TrafficLightRotation);
+			const FVector Euler = Rotator.Euler();
+			TrafficLightZRotation = Euler.Z;
+			TrafficLightXDirection_Debug = Rotator.RotateVector(FVector::XAxisVector);
+		}
+
+		const FMassTrafficLightInstanceDesc TrafficLightDetail(TrafficLightPosition, TrafficLightZRotation, ControlledIntersectionSideMidpoint, TrafficLightTypeIndex);
+		TrafficLights.Add(TrafficLightDetail);
+
+		// DEBUG
+#if ENABLE_DRAW_DEBUG
+		if (GDebugMassTraffic)
+		{
+			UE::MassTraffic::DrawDebugTrafficLight(GWorld, TrafficLightPosition, TrafficLightXDirection_Debug, &ControlledIntersectionSideMidpoint, FColor::Yellow, FColor::Yellow, FColor::Yellow, FColor::Yellow, false, 20.0f);
+		}
+#endif
+	}
+	
 	Modify();
 }
 

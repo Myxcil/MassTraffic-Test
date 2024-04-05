@@ -97,6 +97,10 @@ public:
 	UFUNCTION(CallInEditor, Category="Point Cloud")
 	void PopulateTrafficLightsFromPointCloud();
 
+	/** Generate traffic light data from current map */
+	UFUNCTION(CallInEditor, Category="Point Cloud")
+	void PopulateTrafficLightsFromMap();
+
 	/** Clear / reset the TrafficLightDetails list */   
 	UFUNCTION(CallInEditor, Category="Point Cloud")
 	void ClearTrafficLights()
