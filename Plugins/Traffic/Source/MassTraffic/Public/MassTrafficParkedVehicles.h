@@ -47,6 +47,10 @@ public:
 	UFUNCTION(CallInEditor, Category="Point Cloud")
 	void PopulateParkingSpacesFromPointCloud();
 
+	/** Populate ParkingSpaces from current map */
+	UFUNCTION(CallInEditor, Category="Point Cloud")
+	void PopulateParkingSpacesFromMap();
+
 	/** Clear / reset the ParkingSpaceDetails list */   
 	UFUNCTION(CallInEditor, Category="Point Cloud")
 	void ClearParkingSpaces()

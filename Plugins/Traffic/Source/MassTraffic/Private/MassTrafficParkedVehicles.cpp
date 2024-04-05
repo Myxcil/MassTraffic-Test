@@ -4,6 +4,7 @@
 #include "MassTraffic.h"
 #include "MassTrafficDebugHelpers.h"
 #include "Algo/RandomShuffle.h"
+#include "Kismet/GameplayStatics.h"
 
 #if WITH_EDITOR
 #include "Misc/DefaultValueHelper.h"
@@ -151,6 +152,44 @@ void UMassTrafficParkingSpacesDataAsset::PopulateParkingSpacesFromPointCloud()
 	}
 
 	// Dirty the actor
+	MarkPackageDirty();
+}
+
+void UMassTrafficParkingSpacesDataAsset::PopulateParkingSpacesFromMap()
+{
+	TypedParkingSpaces.Empty();
+
+	const UWorld* World = GetWorld();
+
+	TArray<AActor*> AllParkingSpaceActors;
+	UGameplayStatics::GetAllActorsWithTag(World, "ParkingSpace", AllParkingSpaceActors);
+
+	// Create just one default parking space type and collect add all previously collected actors
+	auto& [ParkingSpaceName, ParkingSpaceTransforms, Count] = TypedParkingSpaces.AddDefaulted_GetRef();
+	ParkingSpaceName = DefaultParkingSpaceType;
+	for(const AActor* Actor : AllParkingSpaceActors)
+	{
+		ParkingSpaceTransforms.Add(Actor->GetTransform());
+	}
+	
+	// Randomly shuffle the parking space transforms so we can select the first NumParkedVehicles and get a random
+	// distribution of parking spaces 
+	if (bShuffleParkingSpaces)
+	{
+		for (FMassTrafficTypedParkingSpaces& TypedParkingSpacesDesc : TypedParkingSpaces)
+		{
+			Algo::RandomShuffle(TypedParkingSpacesDesc.ParkingSpaces);
+		}
+	}
+
+	// Update counts
+	NumParkingSpaces = 0;
+	for (FMassTrafficTypedParkingSpaces& TypedParkingSpacesDesc : TypedParkingSpaces)
+	{
+		TypedParkingSpacesDesc.NumParkingSpaces = TypedParkingSpacesDesc.ParkingSpaces.Num();
+		NumParkingSpaces += TypedParkingSpacesDesc.NumParkingSpaces;
+	}
+	
 	MarkPackageDirty();
 }
 
