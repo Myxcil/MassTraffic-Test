@@ -18,9 +18,13 @@ FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const E
 }
 
 
-FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const bool VehicleGo, const bool VehiclePrepareToStop, const bool PedestrianGo_FrontSide, const bool PedestrianGo_LeftSide, const bool PedestrianGo_RightSide)
+FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const bool VehiclePrepareToGo, const bool VehicleGo, const bool VehiclePrepareToStop, const bool PedestrianGo_FrontSide, const bool PedestrianGo_LeftSide, const bool PedestrianGo_RightSide)
 {
 	EMassTrafficLightStateFlags TrafficLightStateFlags = EMassTrafficLightStateFlags::None;
+	if (VehiclePrepareToGo)
+	{
+		TrafficLightStateFlags |= EMassTrafficLightStateFlags::VehiclePrepareToGo;
+	}
 	if (VehicleGo)
 	{
 		TrafficLightStateFlags |= EMassTrafficLightStateFlags::VehicleGo;

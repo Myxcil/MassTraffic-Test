@@ -319,6 +319,10 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category="Obstacle Avoidance")
 	FVector2D MinimumDistanceToObstacleRange = { 80.0f, 300.0f };
 
+	/** How long a red+yellow light lasts. */
+	UPROPERTY(EditAnywhere, Config, Category="Intersections|Durations|Standard")
+	float StandardTrafficPrepareToGoSeconds = 2.0f;
+
 	/** How long a yellow light lasts. */
 	UPROPERTY(EditAnywhere, Config, Category="Intersections|Durations|Standard")
 	float StandardTrafficPrepareToStopSeconds = 2.0f;

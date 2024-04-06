@@ -2,12 +2,9 @@
 
 
 #include "MassTrafficFragments.h"
-#include "MassTrafficDebugHelpers.h"
-#include "MassTrafficLaneChange.h"
 #include "MassTrafficMovement.h"
 
 #include "MassEntityView.h"
-#include "MassCommandBuffer.h"
 #include "MassZoneGraphNavigationFragments.h"
 
 using namespace UE::MassTraffic;
@@ -32,6 +29,10 @@ FVector FMassTrafficLight::GetXDirection() const
 
 FColor FMassTrafficLight::GetDebugColorForVehicles() const
 {
+	if ((TrafficLightStateFlags & EMassTrafficLightStateFlags::VehiclePrepareToGo) != EMassTrafficLightStateFlags::None)
+	{
+		return FColor::Orange;
+	}
 	if ((TrafficLightStateFlags & EMassTrafficLightStateFlags::VehicleGo) != EMassTrafficLightStateFlags::None)
 	{
 		return FColor::Green;
@@ -330,7 +331,9 @@ void FMassTrafficIntersectionFragment::UpdateTrafficLightsForCurrentPeriod()
 				TrafficLightStateFlags |= (PeriodTimeRemaining > 0.0f ? EMassTrafficLightStateFlags::VehiclePrepareToStop : EMassTrafficLightStateFlags::None);
 			}
 		}
-
+		else // ..light is red and maybe it should go to red+yellow
+		{
+		}
 		
 		// Give traffic light the (possibly modified) traffic light state.
 		TrafficLights[I].TrafficLightStateFlags = TrafficLightStateFlags;
