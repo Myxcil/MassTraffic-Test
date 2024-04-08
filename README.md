@@ -38,4 +38,5 @@ https://www.youtube.com/watch?v=otdm3KhM6vs
 
 # Important
 - MassTrafficSubsystem::ClearAllTrafficLanes() must be called when MassSpwaner::OnDespawningFinished event is fired
+  
 ![Blueprint](/docs/despawn_event.jpg)
