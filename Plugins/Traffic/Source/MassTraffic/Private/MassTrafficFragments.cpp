@@ -333,6 +333,10 @@ void FMassTrafficIntersectionFragment::UpdateTrafficLightsForCurrentPeriod()
 		}
 		else // ..light is red and maybe it should go to red+yellow
 		{
+			const bool bIsCurrentPeriodAboutToEnd =
+				(CurrentPeriod.Duration < 2.0f * MassTrafficSettings->StandardTrafficPrepareToGoSeconds ? 
+					PeriodTimeRemaining < CurrentPeriod.Duration / 2.0f :
+					PeriodTimeRemaining < MassTrafficSettings->StandardTrafficPrepareToGoSeconds);
 		}
 		
 		// Give traffic light the (possibly modified) traffic light state.

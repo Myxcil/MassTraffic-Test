@@ -145,18 +145,18 @@ enum class EMassTrafficLightStateFlags : uint8
 {
 	None					= 0,        // ..red for vehicles and all pedestrians
 	
-	VehiclePrepareToGo		= (1 << 0), // ..red-yellow for vehicles (optional)
-	VehicleGo				= (1 << 1), // ..green for vehicles
-	VehiclePrepareToStop	= (1 << 2), // ..yellow for vehicles
+	VehicleGo				= (1 << 0), // ..green for vehicles
+	VehiclePrepareToStop	= (1 << 1), // ..yellow for vehicles
 	// ...                                 ..otherwise red for vehicles
 	
-	PedestrianGo_FrontSide	= (1 << 3), // ..green for pedestrians, on front side of traffic light
-	PedestrianGo_LeftSide 	= (1 << 4), // ..green for pedestrians, on left side of traffic light
-	PedestrianGo_RightSide	= (1 << 5), // ..green for pedestrians, on right side of traffic light
+	PedestrianGo_FrontSide	= (1 << 2), // ..green for pedestrians, on front side of traffic light
+	PedestrianGo_LeftSide 	= (1 << 3), // ..green for pedestrians, on left side of traffic light
+	PedestrianGo_RightSide	= (1 << 4), // ..green for pedestrians, on right side of traffic light
 	PedestrianGo            = (PedestrianGo_FrontSide | PedestrianGo_LeftSide | PedestrianGo_RightSide),
 	// ...                                 ..otherwise red for pedestrians
 
 	// IMPORTANT - IF YOU ADD A FLAG, you'll need to increase bit size of members that use this enum!! (See all LIGHTSTATEBITS.)
+	VehiclePrepareToGo		= (1 << 5), // ..red-yellow for vehicles
 };
 ENUM_CLASS_FLAGS(EMassTrafficLightStateFlags);
 
