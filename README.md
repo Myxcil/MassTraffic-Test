@@ -1,4 +1,4 @@
-# TrafficTest UE5.3.2
+# TrafficTest - Mass Traffic Plugin for UE5.3.2
 
 Traffic Plugin extracted from CitySample
 - disabled Niagara compilation error
