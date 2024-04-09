@@ -98,7 +98,7 @@ bool FMassTrafficIntersectionDetail::IsMostlySquare() const
 		FMath::Abs(FVector::DotProduct(Sides[1].DirectionIntoIntersection, Sides[2].DirectionIntoIntersection)) <= MaxMostlySquareAdjacentSideCos &&
 		FMath::Abs(FVector::DotProduct(Sides[2].DirectionIntoIntersection, Sides[3].DirectionIntoIntersection)) <= MaxMostlySquareAdjacentSideCos &&
 		FMath::Abs(FVector::DotProduct(Sides[3].DirectionIntoIntersection, Sides[0].DirectionIntoIntersection)) <= MaxMostlySquareAdjacentSideCos;
-}
+ }
 
 
 int32 FMassTrafficIntersectionDetail::GetTrafficLanesConnectingSides(int32 StartSideIndex, int32 EndSideIndex, const FZoneGraphStorage& ZoneGraphStorage, TArray<FZoneGraphTrafficLaneData*>& OutTrafficLanes) const
