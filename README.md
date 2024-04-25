@@ -15,7 +15,7 @@ https://www.youtube.com/watch?v=otdm3KhM6vs
 ### Added:
 - generate ParkingSpot and TrafficLight data from special actors (editor-only) in the current map
 - removed RuleProcessor and therefore Houdini import for parking spaces and traffic lights
-- upgraded to UE 5.4 codebase, plugin is still based on 5.3.
+- upgraded to UE 5.4 codebase
 
 # Notes:
 
