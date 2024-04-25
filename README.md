@@ -1,5 +1,7 @@
 # TrafficTest - Mass Traffic Plugin for UE ~5.3.2~ 5.4
 
+![Overview](/docs/overview.jpg)
+
 Traffic Plugin extracted from CitySample
 - disabled Niagara compilation error
 - fixed missing include for physics solver
