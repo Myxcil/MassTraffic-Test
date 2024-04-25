@@ -89,13 +89,6 @@ public:
 
 #if WITH_EDITOR
 
-	/**
-	 * Populate TrafficLightDetails with point transforms from TrafficLightsPointCloud  
-	 * IMPORTANT - The point cloud should be the same point cloud that is used to generate the city lanes, and has a particular format!
-	 */
-	UFUNCTION(CallInEditor, Category="Point Cloud")
-	void PopulateTrafficLightsFromPointCloud();
-
 	/** Generate traffic light data from current map */
 	UFUNCTION(CallInEditor, Category="Point Cloud")
 	void PopulateTrafficLightsFromMap();
@@ -107,24 +100,6 @@ public:
 		TrafficLights.Reset();
 		NumTrafficLights = 0;
 	}
-
-#endif
-
-#if WITH_EDITORONLY_DATA
-	
-	/**
-	 * RuleProcessor point cloud that contains traffic lights.
-	 * IMPORTANT - This should be the same point cloud that is used to generate the city lanes, and has a particular format!
-	 */
-	UPROPERTY(EditAnywhere, Category="Point Cloud")
-	TSoftObjectPtr<class UPointCloud> TrafficLightsPointCloud;
-
-	/**
-	 * Whether Houdini->UE transform should be applied to traffic light locations in point cloud.
-	 * This is necessary since the traffic light positions in the point cloud are not automatically converted, since they're not stored in the Px Py Pz fields.
-	 */
-	UPROPERTY(EditAnywhere, Category="Point Cloud")
-	bool bApplyHoudiniToUETransformToTrafficLights = true;
 
 #endif
 
@@ -146,5 +121,5 @@ struct MASSTRAFFIC_API FMassTrafficLightsParameters : public FMassSharedFragment
 	TObjectPtr<const UMassTrafficLightTypesDataAsset> TrafficLightTypesData = nullptr;
 	
 	UPROPERTY(Transient)
-	TArray<int16> TrafficLightTypesStaticMeshDescIndex;
+	TArray<FStaticMeshInstanceVisualizationDescHandle> TrafficLightTypesStaticMeshDescHandle;
 };

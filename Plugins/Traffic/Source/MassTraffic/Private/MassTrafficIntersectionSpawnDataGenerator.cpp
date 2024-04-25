@@ -7,7 +7,6 @@
 #if WITH_EDITOR
 #include "Misc/DefaultValueHelper.h"
 #include "Misc/ScopedSlowTask.h"
-#include "PointCloudView.h"
 #endif
 
 template <typename T>

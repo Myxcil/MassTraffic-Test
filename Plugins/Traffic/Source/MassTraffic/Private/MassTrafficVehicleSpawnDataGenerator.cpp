@@ -9,6 +9,7 @@
 #include "MassTrafficInitInterpolationProcessor.h"
 #include "MassTrafficInitTrafficVehicleSpeedProcessor.h"
 #include "MassTrafficInitTrafficVehiclesProcessor.h"
+#include "MassTrafficRescueLaneProcessor.h"
 #include "MassTrafficSubsystem.h"
 #include "MassTrafficUpdateDistanceToNearestObstacleProcessor.h"
 #include "MassTrafficUpdateVelocityProcessor.h"

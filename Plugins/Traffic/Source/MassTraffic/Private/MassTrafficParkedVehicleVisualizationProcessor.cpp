@@ -89,9 +89,10 @@ void UMassTrafficParkedVehicleUpdateCustomVisualizationProcessor::Execute(FMassE
 				if (Visualization.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance)
 				{
 					const FMassTrafficPackedVehicleInstanceCustomData PackedCustomData = FMassTrafficVehicleInstanceCustomData::MakeParkedVehicleCustomData(RandomFractionFragment);
-					
-					ISMInfo[Visualization.StaticMeshDescIndex].AddBatchedTransform(GetTypeHash(Context.GetEntity(Index)), TransformFragment.GetTransform(), Visualization.PrevTransform, VisualizationLODFragment.LODSignificance);
-					ISMInfo[Visualization.StaticMeshDescIndex].AddBatchedCustomData(PackedCustomData, VisualizationLODFragment.LODSignificance);
+
+					const int16 StaticMeshIndex = Visualization.StaticMeshDescHandle.ToIndex(); 
+					ISMInfo[StaticMeshIndex].AddBatchedTransform(Context.GetEntity(Index), TransformFragment.GetTransform(), Visualization.PrevTransform, VisualizationLODFragment.LODSignificance);
+					ISMInfo[StaticMeshIndex].AddBatchedCustomData(PackedCustomData, VisualizationLODFragment.LODSignificance);
 				}
 				Visualization.PrevTransform = TransformFragment.GetTransform();
 			}

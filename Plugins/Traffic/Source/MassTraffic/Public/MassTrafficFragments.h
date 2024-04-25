@@ -79,6 +79,12 @@ struct MASSTRAFFIC_API FMassTrafficPlayerVehicleTag : public FMassTag
 	GENERATED_BODY()
 };
 
+/** Tag to indicate that this vehicle is in emergency mode */
+USTRUCT()
+struct MASSTRAFFIC_API FMassTrafficEMVehicleTag : public FMassTag
+{
+	GENERATED_BODY()
+};
 
 USTRUCT()
 struct MASSTRAFFIC_API FMassTrafficRecyclableVehicleTag : public FMassTag
@@ -156,7 +162,6 @@ enum class EMassTrafficLightStateFlags : uint8
 	// ...                                 ..otherwise red for pedestrians
 
 	// IMPORTANT - IF YOU ADD A FLAG, you'll need to increase bit size of members that use this enum!! (See all LIGHTSTATEBITS.)
-	VehiclePrepareToGo		= (1 << 5), // ..red-yellow for vehicles
 };
 ENUM_CLASS_FLAGS(EMassTrafficLightStateFlags);
 
@@ -228,8 +233,8 @@ struct MASSTRAFFIC_API FMassTrafficLightControl
 	
 	bool bIsValid : 1;	
 	bool bWillAllVehicleLanesCloseInNextPeriodForThisTrafficLight : 1;	
-	EMassTrafficLightStateFlags TrafficLightStateFlags : 6; // (See all LIGHTSTATEBITS.)
-	// ..8..
+	EMassTrafficLightStateFlags TrafficLightStateFlags : 5; // (See all LIGHTSTATEBITS.)
+	// ..7..
 };
 
 
@@ -671,7 +676,7 @@ struct MASSTRAFFIC_API FMassTrafficVehicleControlFragment : public FMassFragment
 	bool bRestrictedToTrunkLanesOnly : 1; // Whether this vehicle is only allowed to drive on trunk lanes // @todo Replace usage with FMassTrafficVehicleSimulationParameters::bRestrictedToTrunkLanesOnly 
 	EMassTrafficChooseNextLanePreference ChooseNextLanePreference : 2; // (See all CHOOSENEWLANEOPEN.)
 	bool bCantStopAtLaneExit : 1; // (See all CANTSTOPLANEEXIT.)
-
+	
 	// Inline copy of CurrentTrafficLaneData->ConstData constant lane data, copied on lane entry
 	FZoneGraphTrafficLaneConstData CurrentLaneConstData;
 
@@ -690,6 +695,8 @@ struct MASSTRAFFIC_API FMassTrafficVehicleControlFragment : public FMassFragment
 	int32 PreviousLaneIndex = INDEX_NONE;
 	
 	float PreviousLaneLength = 0.0f;
+
+	float EmergencyOffset = 0.0f;
 };
 
 

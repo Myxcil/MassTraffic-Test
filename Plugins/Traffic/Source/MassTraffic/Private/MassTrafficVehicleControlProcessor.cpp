@@ -296,7 +296,7 @@ void UMassTrafficVehicleControlProcessor::SimpleVehicleControl(
 	const float NoiseValue = UE::MassTraffic::CalculateNoiseValue(VehicleControlFragment.NoiseInput, MassTrafficSettings->NoisePeriod);
 
 	// Noise based lateral offset
-	LaneOffsetFragment.LateralOffset = NoiseValue * MassTrafficSettings->LateralOffsetMax;
+	LaneOffsetFragment.LateralOffset = NoiseValue * MassTrafficSettings->LateralOffsetMax + VehicleControlFragment.EmergencyOffset;
 
 	// Calculate varied speed limit along lane
 	const float SpeedLimit = UE::MassTraffic::GetSpeedLimitAlongLane(LaneLocationFragment.LaneLength,
@@ -607,8 +607,11 @@ void UMassTrafficVehicleControlProcessor::PIDVehicleControl(
 	// Offset steering chase target by LateralOffset, with noise calculated at SteeringControlChaseTargetDistance ahead
 	// to be consistent with simple vehicle lateral offset computed at that location.
 	const float SteeringControlChaseTargetNoiseValue = UE::MassTraffic::CalculateNoiseValue(VehicleControlFragment.NoiseInput + SteeringControlLookAheadDistance, MassTrafficSettings->NoisePeriod);
-	const float SteeringControlChaseTargetLateralOffset = MassTrafficSettings->LateralOffsetMax * SteeringControlChaseTargetNoiseValue;
-	SteeringControlChaseTargetLocation += SteeringControlChaseTargetOrientation.GetRightVector() * SteeringControlChaseTargetLateralOffset;
+	const float SteeringControlChaseTargetLateralOffset = MassTrafficSettings->LateralOffsetMax * SteeringControlChaseTargetNoiseValue + VehicleControlFragment.EmergencyOffset;
+
+	const float RescueLaneNoiseValue = 1.0f + (MassTrafficSettings->RescueLaneNoiseScale * UE::MassTraffic::CalculateNoiseValue(VehicleControlFragment.NoiseInput, MassTrafficSettings->NoisePeriod));
+	const float RescueLaneOffset = VehicleControlFragment.EmergencyOffset * RescueLaneNoiseValue;
+	SteeringControlChaseTargetLocation += SteeringControlChaseTargetOrientation.GetRightVector() * (SteeringControlChaseTargetLateralOffset + RescueLaneOffset);
 
 	// When lane changing, apply lateral offsets to smoothly transition into the target lane
 	if (LaneChangeFragment && LaneChangeFragment->IsLaneChangeInProgress())
@@ -730,7 +733,13 @@ void UMassTrafficVehicleControlProcessor::PIDVehicleControl(
 	// Reduce speed while cornering
 	const float TurnAngle = TransformFragment.GetTransform().InverseTransformVectorNoScale(SpeedControlChaseTargetOrientation.GetForwardVector()).HeadingAngle();
 	const float TurnSpeedFactor = FMath::GetMappedRangeValueClamped<>(TRange<float>(0.0f, HALF_PI), TRange<float>(1.0f, MassTrafficSettings->TurnSpeedScale), FMath::Abs(TurnAngle));
-	TargetSpeed *= TurnSpeedFactor; 
+	TargetSpeed *= TurnSpeedFactor;
+
+	// If we are forming a rescue lane, throttle down
+	if (VehicleControlFragment.EmergencyOffset != 0)
+	{
+		TargetSpeed = FMath::Min(TargetSpeed, Chaos::MPHToCmS(MassTrafficSettings->RescueLaneMaxSpeedMPH));
+	}
 
 	// Tick the throttle and brake control PID. Feed throttle & brake PID controller with current speed delta. If returned 
 	// value is positive, it's applied as throttle - negative values are applied as brake.

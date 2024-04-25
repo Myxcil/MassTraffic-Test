@@ -29,10 +29,6 @@ FVector FMassTrafficLight::GetXDirection() const
 
 FColor FMassTrafficLight::GetDebugColorForVehicles() const
 {
-	if ((TrafficLightStateFlags & EMassTrafficLightStateFlags::VehiclePrepareToGo) != EMassTrafficLightStateFlags::None)
-	{
-		return FColor::Orange;
-	}
 	if ((TrafficLightStateFlags & EMassTrafficLightStateFlags::VehicleGo) != EMassTrafficLightStateFlags::None)
 	{
 		return FColor::Green;
@@ -330,13 +326,6 @@ void FMassTrafficIntersectionFragment::UpdateTrafficLightsForCurrentPeriod()
 				TrafficLightStateFlags &= ~EMassTrafficLightStateFlags::VehicleGo;
 				TrafficLightStateFlags |= (PeriodTimeRemaining > 0.0f ? EMassTrafficLightStateFlags::VehiclePrepareToStop : EMassTrafficLightStateFlags::None);
 			}
-		}
-		else // ..light is red and maybe it should go to red+yellow
-		{
-			const bool bIsCurrentPeriodAboutToEnd =
-				(CurrentPeriod.Duration < 2.0f * MassTrafficSettings->StandardTrafficPrepareToGoSeconds ? 
-					PeriodTimeRemaining < CurrentPeriod.Duration / 2.0f :
-					PeriodTimeRemaining < MassTrafficSettings->StandardTrafficPrepareToGoSeconds);
 		}
 		
 		// Give traffic light the (possibly modified) traffic light state.

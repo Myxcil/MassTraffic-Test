@@ -119,8 +119,8 @@ void UMassTrafficDriverVisualizationProcessor::Execute(FMassEntityManager& Entit
 			check(IsValid(Params.DriverTypesData));
 			const FMassTrafficDriverTypeData& DriverType = Params.DriverTypesData->DriverTypes[DriverVisualizationFragment.DriverTypeIndex];
 
-			const int16 DriverStaticMeshDescIndex = Params.DriverTypesStaticMeshDescIndex[DriverVisualizationFragment.DriverTypeIndex];
-			if (RepresentationLODFragment.LOD <= GMassTrafficMaxDriverVisualizationLOD && ViewerInfoFragment.ClosestViewerDistanceSq <= MaxDriverVisualizationDistanceSq && DriverStaticMeshDescIndex != INDEX_NONE)
+			const FStaticMeshInstanceVisualizationDescHandle DriverStaticMeshDescHandle = Params.DriverTypesStaticMeshDescHandle[DriverVisualizationFragment.DriverTypeIndex];
+			if (RepresentationLODFragment.LOD <= GMassTrafficMaxDriverVisualizationLOD && ViewerInfoFragment.ClosestViewerDistanceSq <= MaxDriverVisualizationDistanceSq && DriverStaticMeshDescHandle.IsValid())
 			{
 				const FTransform DriverTransform = Params.DriversSeatOffset * TransformFragment.GetTransform();
 				const FTransform DriverPrevTransform = Params.DriversSeatOffset * RepresentationFragment.PrevTransform;
@@ -241,7 +241,8 @@ void UMassTrafficDriverVisualizationProcessor::Execute(FMassEntityManager& Entit
 					}
 					else
 					{
-						ISMInfo[DriverStaticMeshDescIndex].AddBatchedTransform(GetTypeHash(QueryContext.GetEntity(EntityIdx)), DriverTransform, DriverPrevTransform, RepresentationLODFragment.LODSignificance);
+						const int16 DriverStaticMeshDescIndex = DriverStaticMeshDescHandle.ToIndex(); 
+						ISMInfo[DriverStaticMeshDescIndex].AddBatchedTransform(QueryContext.GetEntity(EntityIdx), DriverTransform, DriverPrevTransform, RepresentationLODFragment.LODSignificance);
 						ISMInfo[DriverStaticMeshDescIndex].AddBatchedCustomData(CustomData, RepresentationLODFragment.LODSignificance);
 					}
 				}

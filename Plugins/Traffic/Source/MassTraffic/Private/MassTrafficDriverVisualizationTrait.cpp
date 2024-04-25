@@ -36,8 +36,9 @@ void UMassTrafficDriverVisualizationTrait::BuildTemplate(FMassEntityTemplateBuil
 				MeshDesc.MinLODSignificance = DriverMesh.MinLODSignificance;
 				MeshDesc.MaxLODSignificance = DriverMesh.MaxLODSignificance;
 			}
-			int16 DriverTypeStaticMeshDescIndex = RepresentationSubsystem->FindOrAddStaticMeshDesc(StaticMeshInstanceVisualizationDesc);
-			RegisteredParams.DriverTypesStaticMeshDescIndex.Add(DriverTypeStaticMeshDescIndex);
+
+			FStaticMeshInstanceVisualizationDescHandle DriverTypeStaticMeshDescHandle = RepresentationSubsystem->FindOrAddStaticMeshDesc(StaticMeshInstanceVisualizationDesc);
+			RegisteredParams.DriverTypesStaticMeshDescHandle.Add(DriverTypeStaticMeshDescHandle);
 		}
 	}
 

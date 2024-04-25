@@ -6,7 +6,6 @@
 #include "Math/RandomStream.h"
 #include "ZoneShapeComponent.h"
 #include "ZoneShapeActor.h"
-#include "PointCloudView.h"
 
 #include "MassTrafficEditor.h"
 #include "MassTrafficBuilderTypes.h"
@@ -348,11 +347,6 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category = "Mass Traffic|Mass Traffic Builder|Point Hints")
 	bool GetPointHints(FVector Point, FMassTrafficPointHints& PointHints);
-
-
-	/** Gets all points and IDs from a RuleProcessor point cloud. */
-	UFUNCTION(BlueprintCallable, Category = "Mass Traffic|Mass Traffic Builder|Rule Processor")
-	UPointCloudView* GetRuleProcessorPoints(UPointCloud* PointCloud, TArray<FTransform>& Transforms, TArray<int32>& IDs, bool& bIsValid);
 
 
 	/**

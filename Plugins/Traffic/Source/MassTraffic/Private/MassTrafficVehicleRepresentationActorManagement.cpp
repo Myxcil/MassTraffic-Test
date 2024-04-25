@@ -12,16 +12,13 @@
 #include "Components/PrimitiveComponent.h"
 #include "Rendering/MotionVectorSimulation.h"
 
-EMassActorSpawnRequestAction UMassTrafficVehicleRepresentationActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, FMassEntityManager* EntityManager) const
+EMassActorSpawnRequestAction UMassTrafficVehicleRepresentationActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
 {
-	check(EntityManager);
-
 	const EMassActorSpawnRequestAction Result = Super::OnPostActorSpawn(SpawnRequestHandle, SpawnRequest, EntityManager);
 
 	const FMassActorSpawnRequest& MassActorSpawnRequest = SpawnRequest.Get<const FMassActorSpawnRequest>();
 	check(MassActorSpawnRequest.SpawnedActor);
 
-	check(EntityManager);
 	FMassEntityView EntityView(*EntityManager, MassActorSpawnRequest.MassAgent);
 
 	UMassRepresentationSubsystem* RepresentationSubsystem = EntityView.GetSharedFragmentData<FMassRepresentationSubsystemSharedFragment>().RepresentationSubsystem;

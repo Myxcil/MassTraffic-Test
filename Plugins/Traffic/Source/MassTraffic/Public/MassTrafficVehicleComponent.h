@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EAttachmentRule WheelAttachmentRule = EAttachmentRule::KeepWorld;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FName> WheelSockets;
+
 	void InitWheelAttachmentOffsets(const struct FMassTrafficSimpleVehiclePhysicsSim& VehicleSim);
 
 	void UpdateWheelComponents(const struct FMassTrafficSimpleVehiclePhysicsSim& VehicleSim);

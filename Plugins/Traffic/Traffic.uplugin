@@ -57,10 +57,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "RuleProcessor",
-			"Enabled": true
-		},
-		{
 			"Name": "AnimToTexture",
 			"Enabled": true
 		},

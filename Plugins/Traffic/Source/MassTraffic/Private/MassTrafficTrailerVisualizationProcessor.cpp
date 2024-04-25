@@ -106,7 +106,7 @@ void UMassTrafficTrailerUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 
 			switch (RepresentationFragment.CurrentRepresentation)
 			{
-				case EMassRepresentationType::LowResSpawnedActor:
+			case EMassRepresentationType::LowResSpawnedActor:
 				{
 					if (AActor* Actor = ActorFragment.GetMutable())
 					{
@@ -164,13 +164,14 @@ void UMassTrafficTrailerUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 				case EMassRepresentationType::StaticMeshInstance:
 				{
 					// Add batched instance transform & custom data
-					const int32 InstanceId = GetTypeHash(QueryContext.GetEntity(EntityIndex));
-					ISMInfo[RepresentationFragment.StaticMeshDescIndex].AddBatchedTransform(InstanceId, TransformFragment.GetTransform(), RepresentationFragment.PrevTransform, RepresentationLODFragment.LODSignificance);
-					ISMInfo[RepresentationFragment.StaticMeshDescIndex].AddBatchedCustomData(PackedCustomData, RepresentationLODFragment.LODSignificance);
+					const FMassEntityHandle InstanceHandle = QueryContext.GetEntity(EntityIndex);
+					const int16 Index = RepresentationFragment.StaticMeshDescHandle.ToIndex();
+					ISMInfo[Index].AddBatchedTransform(InstanceHandle, TransformFragment.GetTransform(), RepresentationFragment.PrevTransform, RepresentationLODFragment.LODSignificance);
+					ISMInfo[Index].AddBatchedCustomData(PackedCustomData, RepresentationLODFragment.LODSignificance);
 
 					break;
 				}
-				default:
+			default:
 				{
 					break;
 				}

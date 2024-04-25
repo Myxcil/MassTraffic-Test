@@ -44,7 +44,6 @@ public class MassTrafficEditor : ModuleRules
 				"RenderCore",
 				"RHI",
 				"Blutility",
-				"PointCloud"
 			}
 			);
 		

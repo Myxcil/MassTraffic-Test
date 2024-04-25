@@ -319,10 +319,6 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category="Obstacle Avoidance")
 	FVector2D MinimumDistanceToObstacleRange = { 80.0f, 300.0f };
 
-	/** How long a red+yellow light lasts. */
-	UPROPERTY(EditAnywhere, Config, Category="Intersections|Durations|Standard")
-	float StandardTrafficPrepareToGoSeconds = 2.0f;
-
 	/** How long a yellow light lasts. */
 	UPROPERTY(EditAnywhere, Config, Category="Intersections|Durations|Standard")
 	float StandardTrafficPrepareToStopSeconds = 2.0f;
@@ -401,6 +397,18 @@ public:
 	// vehicle.
 	UPROPERTY(EditAnywhere, Category="Lane Changing")
 	float LaneChangeMaxSideAccessoryLength = 10.0f;
+
+	/** Evading distance when EM vehicle approaches */
+	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
+	float RescueLaneEvasion = 100.0f;
+
+	/** How much variation in evasion */
+	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
+	float RescueLaneNoiseScale = 0.15f;
+
+	/** max speed when forming rescue lane */
+	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
+	float RescueLaneMaxSpeedMPH = 20.0f;
 
 	// @todo Rename Density Management to Overseer
 	

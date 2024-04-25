@@ -73,8 +73,8 @@ void UMassTrafficLightVisualizationTrait::BuildTemplate(FMassEntityTemplateBuild
 		for (const FMassTrafficLightTypeData& TrafficLightType : RegisteredTrafficLightsParams.TrafficLightTypesData->TrafficLightTypes)
 		{
 			// Register visual types
-			int16 TrafficLightTypeStaticMeshDescIndex = RepresentationSubsystem->FindOrAddStaticMeshDesc(TrafficLightType.StaticMeshInstanceDesc);
-			RegisteredTrafficLightsParams.TrafficLightTypesStaticMeshDescIndex.Add(TrafficLightTypeStaticMeshDescIndex);
+			FStaticMeshInstanceVisualizationDescHandle TrafficLightTypeStaticMeshDescHandle = RepresentationSubsystem->FindOrAddStaticMeshDesc(TrafficLightType.StaticMeshInstanceDesc);
+			RegisteredTrafficLightsParams.TrafficLightTypesStaticMeshDescHandle.Add(TrafficLightTypeStaticMeshDescHandle);
 		}
 	}
 

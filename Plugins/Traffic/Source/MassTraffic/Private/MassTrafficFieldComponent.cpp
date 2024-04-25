@@ -41,9 +41,9 @@ public:
 		return Result;
 	}
 
-	virtual void OnTransformChanged() override
+	virtual void OnTransformChanged(FRHICommandListBase& RHICmdList) override
 	{
-		FDebugRenderSceneProxy::OnTransformChanged();
+		FDebugRenderSceneProxy::OnTransformChanged(RHICmdList);
 
 		Boxes[0].Transform = FTransform(GetLocalToWorld());
 	}

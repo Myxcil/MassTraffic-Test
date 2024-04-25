@@ -1055,36 +1055,6 @@ bool AMassTrafficBuilderBaseActor::GetPointHints(FVector Point, FMassTrafficPoin
 }
 
 
-/** 
- * RuleProcessor
- */
-
-UPointCloudView* AMassTrafficBuilderBaseActor::GetRuleProcessorPoints(UPointCloud* PointCloud, TArray<FTransform>& Transforms, TArray<int32>& IDs, bool& bIsValid) 
-{
-	bIsValid = false;
-	Transforms.Empty();
-	IDs.Empty();
-
-	if (!PointCloud)
-	{
-		UE_LOG(LogMassTrafficEditor, Error, TEXT("%s - Rule Processor Point Cloud is null"), ANSI_TO_TCHAR(__FUNCTION__));
-		return nullptr;
-	}
-
-	UPointCloudView* PointCloudView = PointCloud->MakeView();
-	if (!PointCloudView) 
-	{
-		UE_LOG(LogMassTrafficEditor, Error, TEXT("%s - Rule Processor Point Cloud is valid, but could not create Point Cloud View"), ANSI_TO_TCHAR(__FUNCTION__));
-		return nullptr;
-	}
-
-	PointCloudView->GetTransformsAndIds(Transforms, IDs);
-	bIsValid = true;
-
-	return PointCloudView;
-}
-
-
 /**
  * Zone Graph
  */

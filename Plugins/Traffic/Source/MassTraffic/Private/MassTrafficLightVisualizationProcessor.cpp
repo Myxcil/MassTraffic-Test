@@ -18,13 +18,8 @@ FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const E
 }
 
 
-FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const bool VehiclePrepareToGo, const bool VehicleGo, const bool VehiclePrepareToStop, const bool PedestrianGo_FrontSide, const bool PedestrianGo_LeftSide, const bool PedestrianGo_RightSide)
-{
+FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const bool VehicleGo, const bool VehiclePrepareToStop, const bool PedestrianGo_FrontSide, const bool PedestrianGo_LeftSide, const bool PedestrianGo_RightSide){
 	EMassTrafficLightStateFlags TrafficLightStateFlags = EMassTrafficLightStateFlags::None;
-	if (VehiclePrepareToGo)
-	{
-		TrafficLightStateFlags |= EMassTrafficLightStateFlags::VehiclePrepareToGo;
-	}
 	if (VehicleGo)
 	{
 		TrafficLightStateFlags |= EMassTrafficLightStateFlags::VehicleGo;
@@ -134,9 +129,9 @@ void UMassTrafficLightUpdateCustomVisualizationProcessor::Execute(FMassEntityMan
 					// Visualize lights
 					for (const FMassTrafficLight& TrafficLight : TrafficIntersectionFragment.TrafficLights)
 					{
-						check(TrafficLightsParams.TrafficLightTypesStaticMeshDescIndex.IsValidIndex(TrafficLight.TrafficLightTypeIndex));
-						const int16 TrafficLightTypesStaticMeshDescIndex = TrafficLightsParams.TrafficLightTypesStaticMeshDescIndex[TrafficLight.TrafficLightTypeIndex];
-						if (TrafficLightTypesStaticMeshDescIndex != INDEX_NONE)
+						check(TrafficLightsParams.TrafficLightTypesStaticMeshDescHandle.IsValidIndex(TrafficLight.TrafficLightTypeIndex));
+						const FStaticMeshInstanceVisualizationDescHandle TrafficLightTypesStaticMeshDescHandle = TrafficLightsParams.TrafficLightTypesStaticMeshDescHandle[TrafficLight.TrafficLightTypeIndex];
+						if (TrafficLightTypesStaticMeshDescHandle.IsValid())
 						{
 							// Get world space transform
 							FTransform IntersectionLightTransform(FRotator(0.0, TrafficLight.ZRotation, 0.0f), TrafficLight.Position);  
@@ -144,8 +139,9 @@ void UMassTrafficLightUpdateCustomVisualizationProcessor::Execute(FMassEntityMan
 							// Prepare custom data
 							const FMassTrafficLightInstanceCustomData PackedCustomData(TrafficLight.TrafficLightStateFlags);
 
-							// Add instance with custom data 
-							ISMInfo[TrafficLightTypesStaticMeshDescIndex].AddBatchedTransform(GetTypeHash(Context.GetEntity(Index)), IntersectionLightTransform, IntersectionLightTransform, VisualizationLODFragment.LODSignificance);
+							// Add instance with custom data
+							const int16 TrafficLightTypesStaticMeshDescIndex = TrafficLightTypesStaticMeshDescHandle.ToIndex();
+							ISMInfo[TrafficLightTypesStaticMeshDescIndex].AddBatchedTransform(Context.GetEntity(Index), IntersectionLightTransform, IntersectionLightTransform, VisualizationLODFragment.LODSignificance);
 							ISMInfo[TrafficLightTypesStaticMeshDescIndex].AddBatchedCustomData(PackedCustomData, VisualizationLODFragment.LODSignificance);
 
 							// Debug

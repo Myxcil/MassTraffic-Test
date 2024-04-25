@@ -70,7 +70,6 @@ public class MassTraffic : ModuleRules
 				// Misc
 				"CoreUObject",
 				"GameplayTasks",
-				"PointCloud",
 				"RHI",
 				"RenderCore",
 				"Slate",

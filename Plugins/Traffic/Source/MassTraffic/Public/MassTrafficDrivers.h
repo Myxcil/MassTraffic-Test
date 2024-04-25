@@ -5,6 +5,7 @@
 #include "MassLODSubsystem.h"
 #include "Engine/DataTable.h"
 #include "AnimToTextureDataAsset.h"
+#include "MassTrafficDriverVisualizationProcessor.h"
 
 #include "MassTrafficDrivers.generated.h"
 
@@ -86,5 +87,5 @@ struct MASSTRAFFIC_API FMassTrafficDriversParameters : public FMassSharedFragmen
 	EDriverAnimStateVariation AnimStateVariationOverride = EDriverAnimStateVariation::None;
 
 	UPROPERTY(Transient)
-	TArray<int16> DriverTypesStaticMeshDescIndex;
+	TArray<FStaticMeshInstanceVisualizationDescHandle> DriverTypesStaticMeshDescHandle;
 };

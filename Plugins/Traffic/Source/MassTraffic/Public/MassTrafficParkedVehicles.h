@@ -43,10 +43,6 @@ public:
 	
 #if WITH_EDITOR
 
-	/** Populate ParkingSpaces with point transforms from ParkingSpacePointCloud where point "type" is "car" */
-	UFUNCTION(CallInEditor, Category="Point Cloud")
-	void PopulateParkingSpacesFromPointCloud();
-
 	/** Populate ParkingSpaces from current map */
 	UFUNCTION(CallInEditor, Category="Point Cloud")
 	void PopulateParkingSpacesFromMap();
@@ -61,16 +57,6 @@ public:
 #endif
 
 #if WITH_EDITORONLY_DATA
-	
-	/**
-	 * RuleProcessor point cloud that contains traffic lights.
-	 * IMPORTANT - This should be the same point cloud that is used to generate the city lanes, and has a particular format!
-	 */
-	UPROPERTY(EditAnywhere, Category="Point Cloud")
-	TSoftObjectPtr<class UPointCloud> ParkingSpacesPointCloud;
-
-	UPROPERTY(EditAnywhere, Category="Point Cloud")
-	TMap<FString, FName> UnrealInstanceToParkingSpaceTypeName;
 
 	UPROPERTY(EditAnywhere, Category="Point Cloud")
 	FName DefaultParkingSpaceType;
