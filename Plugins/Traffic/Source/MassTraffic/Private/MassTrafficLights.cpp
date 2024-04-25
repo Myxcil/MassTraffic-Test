@@ -8,6 +8,12 @@
 #include "MassTrafficLightActor.h"
 
 #if WITH_EDITOR
+#include "Engine/StaticMesh.h"
+#include "Misc/DefaultValueHelper.h"
+#include "Misc/ScopedSlowTask.h"
+#endif
+
+#if WITH_EDITOR
 
 FVector TransformPositionFromHoudini(const FVector& HoudiniPosition)
 {

@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficVehiclePhysicsProcessor.h"
+#include "Engine/HitResult.h"
 #include "MassTraffic.h"
 #include "MassTrafficDebugHelpers.h"
 #include "MassTrafficFragments.h"
@@ -13,13 +14,13 @@
 #include "MassEntityView.h"
 #include "MassMovementFragments.h"
 #include "MassZoneGraphNavigationFragments.h"
+#include "PBDRigidsSolver.h"
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "PhysicsSettingsCore.h"
 #include "VisualLogger/VisualLogger.h"
 #include "ZoneGraphSubsystem.h"
 #include "ZoneGraphTypes.h"
 #include "MassGameplayExternalTraits.h"
-#include "PBDRigidsSolver.h"
 
 
 template<typename FormatType>
@@ -119,7 +120,7 @@ void UMassTrafficVehiclePhysicsProcessor::Execute(FMassEntityManager& EntityMana
 			const TConstArrayView<FMassTrafficPIDVehicleControlFragment> PIDVehicleControlFragments = QueryContext.GetFragmentView<FMassTrafficPIDVehicleControlFragment>();
 			const TConstArrayView<FMassTrafficVehicleLaneChangeFragment> LaneChangeFragments = QueryContext.GetFragmentView<FMassTrafficVehicleLaneChangeFragment>();
 			const TConstArrayView<FMassTrafficConstrainedTrailerFragment> TrailerConstraintFragments = QueryContext.GetFragmentView<FMassTrafficConstrainedTrailerFragment>();
-			const TConstArrayView<FMassTrafficLaneOffsetFragment> LaneOffsetFragments = QueryContext.GetMutableFragmentView<FMassTrafficLaneOffsetFragment>();
+			const TConstArrayView<FMassTrafficLaneOffsetFragment> LaneOffsetFragments = QueryContext.GetFragmentView<FMassTrafficLaneOffsetFragment>();
 			const TArrayView<FMassTrafficVehicleControlFragment> VehicleControlFragments = QueryContext.GetMutableFragmentView<FMassTrafficVehicleControlFragment>();
 			const TArrayView<FMassTrafficVehiclePhysicsFragment> SimplePhysicsVehicleFragments = QueryContext.GetMutableFragmentView<FMassTrafficVehiclePhysicsFragment>();
 			const TArrayView<FMassVelocityFragment> VelocityFragments = QueryContext.GetMutableFragmentView<FMassVelocityFragment>();

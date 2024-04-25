@@ -4,6 +4,7 @@
 
 #include "Engine/DataAsset.h"
 #include "Engine/DataTable.h"
+#include "MassLODSubsystem.h"
 #include "MassRepresentationTypes.h"
 
 #include "MassTrafficLights.generated.h"
@@ -110,6 +111,8 @@ public:
 
 		NumTrafficLights = TrafficLights.Num();
 	}
+
+	FRandomStream RandomStream;
 };
 
 USTRUCT(BlueprintType)

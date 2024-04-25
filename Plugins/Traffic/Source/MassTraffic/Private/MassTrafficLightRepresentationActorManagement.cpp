@@ -6,10 +6,12 @@
 #include "MassEntityManager.h"
 #include "MassEntityView.h"
 #include "MassRepresentationSubsystem.h"
+#include "MassRepresentationTypes.h"
 #include "MassTrafficLights.h"
 #include "Components/StaticMeshComponent.h"
 
-EMassActorSpawnRequestAction  UMassTrafficLightRepresentationActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
+EMassActorSpawnRequestAction  UMassTrafficLightRepresentationActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle
+	, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
 {
 	const EMassActorSpawnRequestAction Result = Super::OnPostActorSpawn(SpawnRequestHandle, SpawnRequest, EntityManager);
 
@@ -30,9 +32,8 @@ EMassActorSpawnRequestAction  UMassTrafficLightRepresentationActorManagement::On
 	{
 		check(TrafficLightsParams.TrafficLightTypesStaticMeshDescHandle.IsValidIndex(TrafficLight.TrafficLightTypeIndex));
 		const FStaticMeshInstanceVisualizationDescHandle TrafficLightStaticMeshDescHandle = TrafficLightsParams.TrafficLightTypesStaticMeshDescHandle[TrafficLight.TrafficLightTypeIndex];
-		const int16 StaticIndex = TrafficLightStaticMeshDescHandle.ToIndex();
-		check(ISMInfo[StaticIndex].GetDesc().Meshes.Num() > 0);
-		const FMassStaticMeshInstanceVisualizationMeshDesc& MeshDesc = ISMInfo[StaticIndex].GetDesc().Meshes[0];
+		check(ISMInfo[TrafficLightStaticMeshDescHandle.ToIndex()].GetDesc().Meshes.Num() > 0);
+		const FMassStaticMeshInstanceVisualizationMeshDesc& MeshDesc = ISMInfo[TrafficLightStaticMeshDescHandle.ToIndex()].GetDesc().Meshes[0];
 
 		// Compute actor relative transform
 		FTransform IntersectionLightTransform(FRotator(0.0, TrafficLight.ZRotation, 0.0f), TrafficLight.Position);

@@ -676,7 +676,7 @@ struct MASSTRAFFIC_API FMassTrafficVehicleControlFragment : public FMassFragment
 	bool bRestrictedToTrunkLanesOnly : 1; // Whether this vehicle is only allowed to drive on trunk lanes // @todo Replace usage with FMassTrafficVehicleSimulationParameters::bRestrictedToTrunkLanesOnly 
 	EMassTrafficChooseNextLanePreference ChooseNextLanePreference : 2; // (See all CHOOSENEWLANEOPEN.)
 	bool bCantStopAtLaneExit : 1; // (See all CANTSTOPLANEEXIT.)
-	
+
 	// Inline copy of CurrentTrafficLaneData->ConstData constant lane data, copied on lane entry
 	FZoneGraphTrafficLaneConstData CurrentLaneConstData;
 

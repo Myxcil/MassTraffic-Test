@@ -67,7 +67,7 @@ void UMassTrafficTrailerUpdateCustomVisualizationProcessor::ConfigureQueries()
 
 void UMassTrafficTrailerUpdateCustomVisualizationProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	// As we are using the same Visualization.StaticMeshDescIndex here as traffic vehicles, we must
+	// As we are using the same Visualization.StaticMeshDescHandle here as traffic vehicles, we must
 	// add custom float values for trailer instances too.
 	// 
 	// Otherwise the total mesh instance count (e.g: 7 traffic + 3 parked) would be mismatched with the
@@ -106,7 +106,7 @@ void UMassTrafficTrailerUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 
 			switch (RepresentationFragment.CurrentRepresentation)
 			{
-			case EMassRepresentationType::LowResSpawnedActor:
+				case EMassRepresentationType::LowResSpawnedActor:
 				{
 					if (AActor* Actor = ActorFragment.GetMutable())
 					{
@@ -164,14 +164,13 @@ void UMassTrafficTrailerUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 				case EMassRepresentationType::StaticMeshInstance:
 				{
 					// Add batched instance transform & custom data
-					const FMassEntityHandle InstanceHandle = QueryContext.GetEntity(EntityIndex);
-					const int16 Index = RepresentationFragment.StaticMeshDescHandle.ToIndex();
-					ISMInfo[Index].AddBatchedTransform(InstanceHandle, TransformFragment.GetTransform(), RepresentationFragment.PrevTransform, RepresentationLODFragment.LODSignificance);
-					ISMInfo[Index].AddBatchedCustomData(PackedCustomData, RepresentationLODFragment.LODSignificance);
+					ISMInfo[RepresentationFragment.StaticMeshDescHandle.ToIndex()].AddBatchedTransform(QueryContext.GetEntity(EntityIndex)
+						, TransformFragment.GetTransform(), RepresentationFragment.PrevTransform, RepresentationLODFragment.LODSignificance);
+					ISMInfo[RepresentationFragment.StaticMeshDescHandle.ToIndex()].AddBatchedCustomData(PackedCustomData, RepresentationLODFragment.LODSignificance);
 
 					break;
 				}
-			default:
+				default:
 				{
 					break;
 				}

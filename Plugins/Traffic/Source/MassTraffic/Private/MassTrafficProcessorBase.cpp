@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficProcessorBase.h"
-
+#include "MassCommonUtils.h"
 #include "ZoneGraphSubsystem.h" 
 
 void UMassTrafficProcessorBase::Initialize(UObject& InOwner)
@@ -14,8 +14,8 @@ void UMassTrafficProcessorBase::Initialize(UObject& InOwner)
 	LogOwner = UWorld::GetSubsystem<UMassTrafficSubsystem>(InOwner.GetWorld());
 
 	// Seed random stream
-	const int32 TrafficRandomSeed = MassTrafficSettings->RandomSeed;
-	if (TrafficRandomSeed >= 0)
+	const int32 TrafficRandomSeed = UE::Mass::Utils::OverrideRandomSeedForTesting(MassTrafficSettings->RandomSeed);
+	if (TrafficRandomSeed >= 0 || UE::Mass::Utils::IsDeterministic())
 	{
 		RandomStream.Initialize(TrafficRandomSeed);
 	}

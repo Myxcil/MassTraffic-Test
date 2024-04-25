@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficIntersectionSpawnDataGenerator.h"
+#include "MassCommonUtils.h"
 #include "MassTrafficLaneChange.h"
 
 #include "VisualLogger/VisualLogger.h"
@@ -69,9 +70,10 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 
 	// Seed random stream
 	FRandomStream RandomStream;
-	if (MassTrafficSettings->RandomSeed > 0)
+	const int32 TrafficRandomSeed = UE::Mass::Utils::OverrideRandomSeedForTesting(MassTrafficSettings->RandomSeed);
+	if (TrafficRandomSeed > 0 || UE::Mass::Utils::IsDeterministic())
 	{
-		RandomStream.Initialize(MassTrafficSettings->RandomSeed);
+		RandomStream.Initialize(TrafficRandomSeed);
 	}
 	else
 	{
@@ -354,7 +356,7 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 							// Choose a random traffic light type
 							if (CompatibleTrafficLightTypes.Num())
 							{
-								TrafficLightTypeIndex = CompatibleTrafficLightTypes[FMath::RandHelper(CompatibleTrafficLightTypes.Num())];
+								TrafficLightTypeIndex = CompatibleTrafficLightTypes[RandomStream.RandHelper(CompatibleTrafficLightTypes.Num())];
 							}
 						}
 

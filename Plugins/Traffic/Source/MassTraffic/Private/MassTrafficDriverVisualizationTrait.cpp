@@ -8,6 +8,7 @@
 #include "MassRepresentationSubsystem.h"
 #include "Animation/AnimClassInterface.h"
 #include "MassEntityUtils.h"
+#include "MassCommonUtils.h"
 
 
 void UMassTrafficDriverVisualizationTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContext, const UWorld& World) const 
@@ -36,7 +37,6 @@ void UMassTrafficDriverVisualizationTrait::BuildTemplate(FMassEntityTemplateBuil
 				MeshDesc.MinLODSignificance = DriverMesh.MinLODSignificance;
 				MeshDesc.MaxLODSignificance = DriverMesh.MaxLODSignificance;
 			}
-
 			FStaticMeshInstanceVisualizationDescHandle DriverTypeStaticMeshDescHandle = RepresentationSubsystem->FindOrAddStaticMeshDesc(StaticMeshInstanceVisualizationDesc);
 			RegisteredParams.DriverTypesStaticMeshDescHandle.Add(DriverTypeStaticMeshDescHandle);
 		}
@@ -59,8 +59,8 @@ void UMassTrafficDriverInitializer::Initialize(UObject& Owner)
 	Super::Initialize(Owner);
 
 	// Seed RandomStream
-	const int32 TrafficRandomSeed = GetDefault<UMassTrafficSettings>()->RandomSeed;
-	if (TrafficRandomSeed >= 0)
+	const int32 TrafficRandomSeed = UE::Mass::Utils::OverrideRandomSeedForTesting(GetDefault<UMassTrafficSettings>()->RandomSeed);
+	if (TrafficRandomSeed >= 0 || UE::Mass::Utils::IsDeterministic())
 	{
 		RandomStream.Initialize(TrafficRandomSeed);
 	}
@@ -76,11 +76,11 @@ void UMassTrafficDriverInitializer::ConfigureQueries()
 	EntityQuery.AddRequirement<FMassTrafficDriverVisualizationFragment>(EMassFragmentAccess::ReadWrite);
 }
 
-void UMassTrafficDriverInitializer::Execute(FMassEntityManager& EntitySubsystem,
+void UMassTrafficDriverInitializer::Execute(FMassEntityManager& EntityManager,
 	FMassExecutionContext& Context)
 {
 	// Generate random fractions 
-	EntityQuery.ForEachEntityChunk(EntitySubsystem, Context, [this](FMassExecutionContext& QueryContext)
+	EntityQuery.ForEachEntityChunk(EntityManager, Context, [this](FMassExecutionContext& QueryContext)
 	{
 		// Get driver types
 		const FMassTrafficDriversParameters& Params = QueryContext.GetConstSharedFragment<FMassTrafficDriversParameters>();

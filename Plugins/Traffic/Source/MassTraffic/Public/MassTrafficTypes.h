@@ -65,7 +65,7 @@ public:
 	
 	FORCEINLINE void Set(float Value, const bool bDoAutoBound = DoAutoBoundDefault)
 	{
-		ensureAlwaysMsgf(bDoAutoBound || Value >= 0.0f && Value <= 1.0f, TEXT("%s - Value %f outside range [0.0 .. 1.0]. Clamping."), Value);
+		ensureAlwaysMsgf(bDoAutoBound || Value >= 0.0f && Value <= 1.0f, TEXT("Value %f outside range [0.0 .. 1.0]. Clamping."), Value);
 		
 		Value = FMath::Clamp(Value, 0.0f, 1.0f);
 
@@ -140,14 +140,14 @@ public:
 	
 	FORCEINLINE static float Low() 
 	{
-		ensureAlwaysMsgf(LowDenominator != 0, TEXT("%s - Low denominator is zero."));
+		ensureAlwaysMsgf(LowDenominator != 0, TEXT("Low denominator is zero."));
 
 		return static_cast<float>(LowNumerator) / static_cast<float>(LowDenominator);		
 	}
 
 	FORCEINLINE static float High() 
 	{
-		ensureAlwaysMsgf(HighDenominator != 0, TEXT("%s - High denominator is zero."));
+		ensureAlwaysMsgf(HighDenominator != 0, TEXT("High denominator is zero."));
 
 		return static_cast<float>(HighNumerator) / static_cast<float>(HighDenominator);		
 	}
@@ -168,7 +168,7 @@ public:
 	{
 		const float Low = TFraction<DoAutoBoundDefault, StorageType>::Low();
 		const float High = TFraction<DoAutoBoundDefault, StorageType>::High();
-		ensureAlwaysMsgf(Low != High, TEXT("%s - Low:%f == High:%f."), Low, High);
+		ensureAlwaysMsgf(Low != High, TEXT("Low:%f == High:%f."), Low, High);
 		
 		TFraction<DoAutoBoundDefault, StorageType>::Set((Value - Low) / (High - Low), bDoAutoBound);
 	}

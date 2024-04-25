@@ -18,7 +18,8 @@ FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const E
 }
 
 
-FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const bool VehicleGo, const bool VehiclePrepareToStop, const bool PedestrianGo_FrontSide, const bool PedestrianGo_LeftSide, const bool PedestrianGo_RightSide){
+FMassTrafficLightInstanceCustomData::FMassTrafficLightInstanceCustomData(const bool VehicleGo, const bool VehiclePrepareToStop, const bool PedestrianGo_FrontSide, const bool PedestrianGo_LeftSide, const bool PedestrianGo_RightSide)
+{
 	EMassTrafficLightStateFlags TrafficLightStateFlags = EMassTrafficLightStateFlags::None;
 	if (VehicleGo)
 	{
@@ -131,7 +132,7 @@ void UMassTrafficLightUpdateCustomVisualizationProcessor::Execute(FMassEntityMan
 					{
 						check(TrafficLightsParams.TrafficLightTypesStaticMeshDescHandle.IsValidIndex(TrafficLight.TrafficLightTypeIndex));
 						const FStaticMeshInstanceVisualizationDescHandle TrafficLightTypesStaticMeshDescHandle = TrafficLightsParams.TrafficLightTypesStaticMeshDescHandle[TrafficLight.TrafficLightTypeIndex];
-						if (TrafficLightTypesStaticMeshDescHandle.IsValid())
+						if (TrafficLightTypesStaticMeshDescHandle.ToIndex() != INDEX_NONE)
 						{
 							// Get world space transform
 							FTransform IntersectionLightTransform(FRotator(0.0, TrafficLight.ZRotation, 0.0f), TrafficLight.Position);  
@@ -139,10 +140,10 @@ void UMassTrafficLightUpdateCustomVisualizationProcessor::Execute(FMassEntityMan
 							// Prepare custom data
 							const FMassTrafficLightInstanceCustomData PackedCustomData(TrafficLight.TrafficLightStateFlags);
 
-							// Add instance with custom data
-							const int16 TrafficLightTypesStaticMeshDescIndex = TrafficLightTypesStaticMeshDescHandle.ToIndex();
-							ISMInfo[TrafficLightTypesStaticMeshDescIndex].AddBatchedTransform(Context.GetEntity(Index), IntersectionLightTransform, IntersectionLightTransform, VisualizationLODFragment.LODSignificance);
-							ISMInfo[TrafficLightTypesStaticMeshDescIndex].AddBatchedCustomData(PackedCustomData, VisualizationLODFragment.LODSignificance);
+							// Add instance with custom data 
+							ISMInfo[TrafficLightTypesStaticMeshDescHandle.ToIndex()].AddBatchedTransform(Context.GetEntity(Index)
+								, IntersectionLightTransform, IntersectionLightTransform, VisualizationLODFragment.LODSignificance);
+							ISMInfo[TrafficLightTypesStaticMeshDescHandle.ToIndex()].AddBatchedCustomData(PackedCustomData, VisualizationLODFragment.LODSignificance);
 
 							// Debug
 							#if WITH_MASSTRAFFIC_DEBUG

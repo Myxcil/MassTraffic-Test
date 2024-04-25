@@ -12,7 +12,8 @@
 #include "Components/PrimitiveComponent.h"
 #include "Rendering/MotionVectorSimulation.h"
 
-EMassActorSpawnRequestAction UMassTrafficVehicleRepresentationActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
+EMassActorSpawnRequestAction UMassTrafficVehicleRepresentationActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle
+	, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
 {
 	const EMassActorSpawnRequestAction Result = Super::OnPostActorSpawn(SpawnRequestHandle, SpawnRequest, EntityManager);
 

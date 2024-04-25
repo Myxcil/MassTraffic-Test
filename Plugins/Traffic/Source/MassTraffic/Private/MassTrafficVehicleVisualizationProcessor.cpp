@@ -260,11 +260,11 @@ void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 						// Add ISMC instance with custom data
 						if (RepresentationFragment.StaticMeshDescHandle.IsValid())
 						{
-							const int16 StaticMeshIndex = RepresentationFragment.StaticMeshDescHandle.ToIndex();
-							ISMInfo[StaticMeshIndex].AddBatchedTransform(Entity, TransformFragment.GetTransform(), RepresentationFragment.PrevTransform, RepresentationLODFragment.LODSignificance);
+							ISMInfo[RepresentationFragment.StaticMeshDescHandle.ToIndex()].AddBatchedTransform(Entity
+								, TransformFragment.GetTransform(), RepresentationFragment.PrevTransform, RepresentationLODFragment.LODSignificance);
 
 							const FMassTrafficPackedVehicleInstanceCustomData PackedCustomData = FMassTrafficVehicleInstanceCustomData::MakeTrafficVehicleCustomData(VehicleStateFragment, RandomFractionFragment);
-							ISMInfo[StaticMeshIndex].AddBatchedCustomData(PackedCustomData, RepresentationLODFragment.LODSignificance);
+							ISMInfo[RepresentationFragment.StaticMeshDescHandle.ToIndex()].AddBatchedCustomData(PackedCustomData, RepresentationLODFragment.LODSignificance);
 						}
 						break;
 					}

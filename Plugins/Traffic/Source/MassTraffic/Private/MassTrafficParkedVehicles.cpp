@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficParkedVehicles.h"
+#include "MassCommonUtils.h"
 
 #include "EngineUtils.h"
 #include "MassTraffic.h"
@@ -10,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 
 #if WITH_EDITOR
+#include "Misc/DefaultValueHelper.h"
 #include "Misc/ScopedSlowTask.h"
 #endif
 

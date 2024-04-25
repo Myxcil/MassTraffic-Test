@@ -12,7 +12,8 @@
 #include "ChaosVehicleMovementComponent.h"
 
 
-EMassActorSpawnRequestAction  UMassTrafficParkedVehicleRepresentationActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
+EMassActorSpawnRequestAction  UMassTrafficParkedVehicleRepresentationActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle
+	, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
 {
 	const EMassActorSpawnRequestAction Result = Super::OnPostActorSpawn(SpawnRequestHandle, SpawnRequest, EntityManager);
 	

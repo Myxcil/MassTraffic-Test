@@ -13,6 +13,9 @@
 #include "MassExecutionContext.h"
 #include "MassRepresentationFragments.h"
 #include "MassRepresentationSubsystem.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+
 
 UMassTrafficDriverVisualizationProcessor::UMassTrafficDriverVisualizationProcessor()
 	: EntityQuery_Conditional(*this)
@@ -241,9 +244,9 @@ void UMassTrafficDriverVisualizationProcessor::Execute(FMassEntityManager& Entit
 					}
 					else
 					{
-						const int16 DriverStaticMeshDescIndex = DriverStaticMeshDescHandle.ToIndex(); 
-						ISMInfo[DriverStaticMeshDescIndex].AddBatchedTransform(QueryContext.GetEntity(EntityIdx), DriverTransform, DriverPrevTransform, RepresentationLODFragment.LODSignificance);
-						ISMInfo[DriverStaticMeshDescIndex].AddBatchedCustomData(CustomData, RepresentationLODFragment.LODSignificance);
+						ISMInfo[DriverStaticMeshDescHandle.ToIndex()].AddBatchedTransform(QueryContext.GetEntity(EntityIdx)
+							, DriverTransform, DriverPrevTransform, RepresentationLODFragment.LODSignificance);
+						ISMInfo[DriverStaticMeshDescHandle.ToIndex()].AddBatchedCustomData(CustomData, RepresentationLODFragment.LODSignificance);
 					}
 				}
 			}

@@ -3,9 +3,9 @@
 #pragma once
 
 #include "MassLODSubsystem.h"
+#include "MassRepresentationTypes.h"
 #include "Engine/DataTable.h"
 #include "AnimToTextureDataAsset.h"
-#include "MassTrafficDriverVisualizationProcessor.h"
 
 #include "MassTrafficDrivers.generated.h"
 

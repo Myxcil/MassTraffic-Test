@@ -64,7 +64,7 @@ void UMassTrafficParkedVehicleUpdateCustomVisualizationProcessor::ConfigureQueri
 
 void UMassTrafficParkedVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	// As we are using the same Visualization.StaticMeshDescIndex here as traffic vehicles, we must
+	// As we are using the same Visualization.StaticMeshDescHandle here as traffic vehicles, we must
 	// add custom float values for parked instances too.
 	// 
 	// Otherwise the total mesh instance count (e.g: 7 traffic + 3 parked) would be mismatched with the
@@ -89,10 +89,10 @@ void UMassTrafficParkedVehicleUpdateCustomVisualizationProcessor::Execute(FMassE
 				if (Visualization.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance)
 				{
 					const FMassTrafficPackedVehicleInstanceCustomData PackedCustomData = FMassTrafficVehicleInstanceCustomData::MakeParkedVehicleCustomData(RandomFractionFragment);
-
-					const int16 StaticMeshIndex = Visualization.StaticMeshDescHandle.ToIndex(); 
-					ISMInfo[StaticMeshIndex].AddBatchedTransform(Context.GetEntity(Index), TransformFragment.GetTransform(), Visualization.PrevTransform, VisualizationLODFragment.LODSignificance);
-					ISMInfo[StaticMeshIndex].AddBatchedCustomData(PackedCustomData, VisualizationLODFragment.LODSignificance);
+					
+					ISMInfo[Visualization.StaticMeshDescHandle.ToIndex()].AddBatchedTransform(Context.GetEntity(Index)
+						, TransformFragment.GetTransform(), Visualization.PrevTransform, VisualizationLODFragment.LODSignificance);
+					ISMInfo[Visualization.StaticMeshDescHandle.ToIndex()].AddBatchedCustomData(PackedCustomData, VisualizationLODFragment.LODSignificance);
 				}
 				Visualization.PrevTransform = TransformFragment.GetTransform();
 			}

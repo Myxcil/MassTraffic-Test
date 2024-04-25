@@ -9,6 +9,7 @@
 #include "DrawDebugHelpers.h"
 #include "ZoneGraphSubsystem.h"
 #include "Spatial/PointHashGrid3.h"
+#include "Engine/HitResult.h"
 #include "Engine/World.h"
 
 static const float BigZ = 1000000.0f;

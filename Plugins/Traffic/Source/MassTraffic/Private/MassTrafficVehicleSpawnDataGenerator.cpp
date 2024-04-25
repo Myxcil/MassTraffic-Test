@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficVehicleSpawnDataGenerator.h"
+#include "MassCommonUtils.h"
 
 #include "MassEntityConfigAsset.h"
 #include "MassTrafficChooseNextLaneProcessor.h"
@@ -9,7 +10,6 @@
 #include "MassTrafficInitInterpolationProcessor.h"
 #include "MassTrafficInitTrafficVehicleSpeedProcessor.h"
 #include "MassTrafficInitTrafficVehiclesProcessor.h"
-#include "MassTrafficRescueLaneProcessor.h"
 #include "MassTrafficSubsystem.h"
 #include "MassTrafficUpdateDistanceToNearestObstacleProcessor.h"
 #include "MassTrafficUpdateVelocityProcessor.h"
@@ -36,9 +36,10 @@ void UMassTrafficVehicleSpawnDataGenerator::Generate(UObject& QueryOwner,
 
 	// Seed random stream
 	FRandomStream RandomStream;
-	if (RandomSeed > 0)
+	const int32 TrafficRandomSeed = UE::Mass::Utils::OverrideRandomSeedForTesting(RandomSeed);
+	if (TrafficRandomSeed > 0 || UE::Mass::Utils::IsDeterministic())
 	{
-		RandomStream.Initialize(RandomSeed);
+		RandomStream.Initialize(TrafficRandomSeed);
 	}
 	else if (MassTrafficSettings->RandomSeed > 0)
 	{

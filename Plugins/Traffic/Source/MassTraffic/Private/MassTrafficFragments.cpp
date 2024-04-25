@@ -2,9 +2,12 @@
 
 
 #include "MassTrafficFragments.h"
+#include "MassTrafficDebugHelpers.h"
+#include "MassTrafficLaneChange.h"
 #include "MassTrafficMovement.h"
 
 #include "MassEntityView.h"
+#include "MassCommandBuffer.h"
 #include "MassZoneGraphNavigationFragments.h"
 
 using namespace UE::MassTraffic;
@@ -327,6 +330,7 @@ void FMassTrafficIntersectionFragment::UpdateTrafficLightsForCurrentPeriod()
 				TrafficLightStateFlags |= (PeriodTimeRemaining > 0.0f ? EMassTrafficLightStateFlags::VehiclePrepareToStop : EMassTrafficLightStateFlags::None);
 			}
 		}
+
 		
 		// Give traffic light the (possibly modified) traffic light state.
 		TrafficLights[I].TrafficLightStateFlags = TrafficLightStateFlags;
