@@ -1,5 +1,13 @@
 # TrafficTest - Mass Traffic Plugin for UE ~5.3.2~ 5.4
 
+I've only forked this repo so I can do some proper research into a non-trivial Mass system, so please don't expect any maintenance! There probably won't be any!
+
+If it doesn't work for you, feel free to fix it :)
+
+Main 'TODO' at the moment is work out how the traffic lights were originally placed, because the code as-is doesn't appear to be doing what's in the screenshot below.
+
+---
+
 ![Overview](/docs/overview.jpg)
 
 Traffic Plugin extracted from CitySample
