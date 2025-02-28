@@ -25,24 +25,26 @@ public class MassTraffic : ModuleRules
 			new string[]
 			{
 				// AI/MassAI Plugin Modules
-				"MassAIBehavior",
-				"MassAIDebug",
-				"MassNavigation",
-				"MassZoneGraphNavigation",
-				
-				// AI/MassCrowd Plugin Modules
-				"MassCrowd",
-
-				// Runtime/MassEntity Plugin Modules
 				"MassEntity",
-
-				// Runtime/MassGameplay Plugin Modules
-				"MassActors",
+				// "StructUtils",
 				"MassCommon",
-				"MassGameplayDebug",
-				"MassLOD",
-				"MassRepresentation",
+				"MassMovement",
+				"MassActors",
 				"MassSpawner",
+				"MassGameplayDebug",
+				"MassSignals",
+				"MassCrowd",
+				"MassActors",
+				"MassSpawner",
+				"MassRepresentation",
+				"MassReplication",
+				"MassNavigation",
+				"MassSimulation",
+				"ZoneGraph",
+                "MassGameplayDebug",
+                "MassZoneGraphNavigation",
+                "MassLOD",
+                "MassAIBehavior",
 				
 				// Misc
 				"AIModule",
@@ -50,7 +52,6 @@ public class MassTraffic : ModuleRules
 				"Engine",
 				"NetCore",
 				"StateTreeModule",
-				"StructUtils",
 				"ZoneGraph",
 				"AnimToTexture",
 				"ChaosVehicles",

@@ -28,8 +28,12 @@ EMassActorSpawnRequestAction  UMassTrafficLightRepresentationActorManagement::On
 	const FMassTrafficLightsParameters& TrafficLightsParams = IntersectionMassEntityView.GetConstSharedFragmentData<FMassTrafficLightsParameters>();
 	
 	const FMassTrafficIntersectionFragment& TrafficIntersectionFragment = IntersectionMassEntityView.GetFragmentData<FMassTrafficIntersectionFragment>();
+
+	// UE_LOG(LogTemp, Warning, TEXT("Num traffic lights: %i"), TrafficIntersectionFragment.TrafficLights.Num())
+	
 	for (const FMassTrafficLight& TrafficLight : TrafficIntersectionFragment.TrafficLights)
 	{
+		
 		check(TrafficLightsParams.TrafficLightTypesStaticMeshDescHandle.IsValidIndex(TrafficLight.TrafficLightTypeIndex));
 		const FStaticMeshInstanceVisualizationDescHandle TrafficLightStaticMeshDescHandle = TrafficLightsParams.TrafficLightTypesStaticMeshDescHandle[TrafficLight.TrafficLightTypeIndex];
 		check(ISMInfo[TrafficLightStaticMeshDescHandle.ToIndex()].GetDesc().Meshes.Num() > 0);
@@ -38,6 +42,8 @@ EMassActorSpawnRequestAction  UMassTrafficLightRepresentationActorManagement::On
 		// Compute actor relative transform
 		FTransform IntersectionLightTransform(FRotator(0.0, TrafficLight.ZRotation, 0.0f), TrafficLight.Position);
 		IntersectionLightTransform.SetToRelativeTransform(MassActorSpawnRequest.SpawnedActor->GetActorTransform());
+
+		// UE_LOG(LogTemp, Warning, TEXT("IntersectionLightTransform: %s / Traffic Light Position: %s"), *IntersectionLightTransform.ToHumanReadableString(), *TrafficLight.Position.ToString());
 
 		// Create UStaticMeshComponent for the light
 		UStaticMeshComponent* TrafficLightMeshComponent = NewObject<UStaticMeshComponent>(MassActorSpawnRequest.SpawnedActor);

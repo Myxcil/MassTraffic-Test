@@ -9,8 +9,9 @@
 // Sets default values
 AMassTrafficProxyActor::AMassTrafficProxyActor()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	bIsEditorOnlyActor = true;
-	CreateDefaultSubobject<USceneComponent>("Root");
+	auto Root = CreateDefaultSubobject<USceneComponent>("Root");
+	SetRootComponent(Root);
 }

@@ -29,6 +29,7 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::ConfigureQueries()
 	NominalParkedVehicleEntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	NominalParkedVehicleEntityQuery.AddRequirement<FMassActorFragment>(EMassFragmentAccess::ReadOnly);
 	NominalParkedVehicleEntityQuery.AddConstSharedRequirement<FMassTrafficVehicleSimulationParameters>();
+	// NominalParkedVehicleEntityQuery.AddSharedRequirement<FMassTrafficVehicleSimulationParameters>(EMassFragmentAccess::ReadOnly);
 }
 
 void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)

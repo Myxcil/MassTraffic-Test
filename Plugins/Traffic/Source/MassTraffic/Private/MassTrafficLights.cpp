@@ -37,7 +37,9 @@ void UMassTrafficLightInstancesDataAsset::PopulateTrafficLightsFromMap()
 	// Iterate over all proxy actors and create the data similar to the point cloud 
 	for(TActorIterator<AMassTrafficLightActor> It(World); It; ++It)
 	{
-		const FTransform& Transform = It->GetTransform(); 
+		const FTransform& Transform = It->GetTransform();
+
+		UE_LOG(LogTemp, Warning, TEXT("Found something..."))
 		
 		int16 TrafficLightTypeIndex = It->GetTrafficLightTypeIndex();
 		if (TrafficLightTypeIndex == INDEX_NONE)

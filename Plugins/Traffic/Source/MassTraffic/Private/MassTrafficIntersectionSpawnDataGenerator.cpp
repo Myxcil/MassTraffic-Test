@@ -363,7 +363,25 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 						// Add traffic light to intersection
 						if (TrafficLightTypeIndex != INDEX_NONE)
 						{
-							const FMassTrafficLight TrafficLight(TrafficLightDetail.Position, TrafficLightDetail.ZRotation, TrafficLightTypeIndex, EMassTrafficLightStateFlags::None);
+							FVector SideDirection = Side.DirectionIntoIntersection;
+							// BLARG
+							
+							float RotationToSide = FMath::RadiansToDegrees(FMath::Atan2(SideDirection.Y, SideDirection.X));
+
+							FVector SideToCentre = Side.IntersectionLanesBeginMidpoint - TrafficLightDetail.Position;
+							SideToCentre.Normalize();
+
+							FVector RotationCheck = FVector::ForwardVector.RotateAngleAxis(RotationToSide, FVector::UpVector);
+							if (SideToCentre.Dot(RotationCheck) <= 0) {
+								RotationToSide += 180;
+							}
+
+							// TODO: work out what this should actually be...
+							FVector SidewaysOffset = FVector::RightVector.RotateAngleAxis(RotationToSide, FVector::UpVector).RightVector * 500.0;
+							
+							
+							UE_LOG(LogTemp, Warning, TEXT("IntersectionSpawnDataGenerator: Making light with position %s | rotation : %f"), *Side.IntersectionLanesBeginMidpoint.ToString(), TrafficLightDetail.ZRotation)
+							const FMassTrafficLight TrafficLight(Side.IntersectionLanesBeginMidpoint + SidewaysOffset, RotationToSide, TrafficLightTypeIndex, EMassTrafficLightStateFlags::None);
 							const int8 TrafficLightIndex = static_cast<int8>(IntersectionFragment.TrafficLights.Add(TrafficLight));
 							
 							IntersectionSide_To_TrafficLightIndex.Add(TrafficLightIndex);
@@ -451,6 +469,8 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 				!IntersectionDetail->HasSideWithInboundLanesFromFreeway())
 			{
 				// Make several periods from each side..
+
+				UE_LOG(LogTemp, Warning, TEXT("Four sides"))
 				
 				for (int32 S = 0; S < 4; S++)
 				{
@@ -604,6 +624,8 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 			{
 				// Make periods for the vehicle lanes from each side..
 
+				UE_LOG(LogTemp, Warning, TEXT("Three sides, probably"))
+
 				for (int32 S = 0; S < IntersectionDetail->Sides.Num(); S++)
 				{
 					FMassTrafficIntersectionSide& Side = IntersectionDetail->Sides[S];
@@ -665,6 +687,9 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 
 			else if (!IntersectionDetail->bHasTrafficLights)
 			{
+
+				UE_LOG(LogTemp, Warning, TEXT("No traffic lights at all"))
+				
 				for (int32 S = 0; S < IntersectionDetail->Sides.Num(); S++)
 				{
 					FMassTrafficIntersectionSide& Side = IntersectionDetail->Sides[S];
@@ -862,5 +887,8 @@ int32 UMassTrafficIntersectionSpawnDataGenerator::GetNumLogicalLanesForIntersect
 			UniqueLaneBeginPoints.Add(LaneBeginPoint);
 		}
 	}
+
+	// UE_LOG(LogTemp, Warning,)
+	
 	return UniqueLaneBeginPoints.Num();
 }

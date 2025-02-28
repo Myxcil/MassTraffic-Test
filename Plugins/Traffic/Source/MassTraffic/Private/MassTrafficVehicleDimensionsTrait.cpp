@@ -19,5 +19,6 @@ void UMassTrafficVehicleDimensionsTrait::BuildTemplate(FMassEntityTemplateBuildC
 	SimulationConfig.HalfWidth = Params.HalfWidth;
 
 	const FConstSharedStruct SimulationConfigSharedFragment = EntityManager.GetOrCreateConstSharedFragment(SimulationConfig);
+	// const FConstSharedStruct SimulationConfigSharedFragment = EntityManager.GetOrCreateSharedFragment(SimulationConfig);
 	BuildContext.AddConstSharedFragment(SimulationConfigSharedFragment);
 }

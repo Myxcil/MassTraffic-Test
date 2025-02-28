@@ -376,7 +376,8 @@ void UMassTrafficOverseerProcessor::Execute(FMassEntityManager& EntityManager, F
 				// lanes to spread them out onto non-trunk lanes 
 				if (!bTrunkLanesPhase && BusiestLane->ConstData.bIsTrunkLane)
 				{
-					const FMassTrafficVehicleSimulationParameters& VehicleSimulationParams = BusiestLaneVehicle_EntityView.GetConstSharedFragmentData<FMassTrafficVehicleSimulationParameters>();
+					// const FMassTrafficVehicleSimulationParameters& VehicleSimulationParams = BusiestLaneVehicle_EntityView.GetConstSharedFragmentData<FMassTrafficVehicleSimulationParameters>();
+					const FMassTrafficVehicleSimulationParameters& VehicleSimulationParams = BusiestLaneVehicle_EntityView.GetSharedFragmentData<FMassTrafficVehicleSimulationParameters>();
 					if (VehicleSimulationParams.bRestrictedToTrunkLanesOnly)
 					{
 						// We can't transfer any more beyond this vehicle as we rely on removing contiguous lines of

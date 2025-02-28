@@ -7,10 +7,9 @@
 #include "MassActorSubsystem.h"
 #include "MassTrafficVehiclePhysicsProcessor.generated.h"
 
-
 UCLASS()
-class MASSTRAFFIC_API UMassTrafficVehiclePhysicsProcessor : public UMassTrafficProcessorBase
-{
+class MASSTRAFFIC_API UMassTrafficVehiclePhysicsProcessor : public UMassTrafficProcessorBase {
+
 	GENERATED_BODY()
 
 public:

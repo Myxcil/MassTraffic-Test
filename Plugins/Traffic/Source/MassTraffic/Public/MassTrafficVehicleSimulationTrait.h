@@ -11,7 +11,7 @@
 #include "MassTrafficVehicleSimulationTrait.generated.h"
 
 USTRUCT()
-struct MASSTRAFFIC_API FMassTrafficVehicleSimulationParameters : public FMassSharedFragment
+struct MASSTRAFFIC_API FMassTrafficVehicleSimulationParameters : public FMassConstSharedFragment
 {
 	GENERATED_BODY()
 	

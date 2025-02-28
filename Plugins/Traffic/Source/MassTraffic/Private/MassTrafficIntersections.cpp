@@ -162,6 +162,9 @@ void FMassTrafficIntersectionDetail::Build(
 	{
 		SidesCenter = FVector::ZeroVector;
 		float SideCount = 0.0f;
+
+		// UE_LOG(LogTemp, Warning, TEXT("Got %i sides"), Sides.Num())
+		
 		for (FMassTrafficIntersectionSide& Side : Sides)
 		{
 			FVector Midpoint = FVector::ZeroVector;
@@ -172,6 +175,8 @@ void FMassTrafficIntersectionDetail::Build(
 				Midpoint += UE::MassTraffic::GetLaneBeginPoint(VehicleIntersectionTrafficLaneData->LaneHandle.Index, ZoneGraphStorage); 
 				DirectionIntoIntersection += UE::MassTraffic::GetLaneBeginDirection(VehicleIntersectionTrafficLaneData->LaneHandle.Index, ZoneGraphStorage);
 				Count += 1.0f;
+
+				// UE_LOG(LogTemp, Warning, TEXT("Midpoint: %s / Direction: %s"), *Midpoint.ToString(), *DirectionIntoIntersection.ToString())
 			}
 			Midpoint /= Count;
 			DirectionIntoIntersection /= Count;
@@ -392,7 +397,7 @@ void FMassTrafficIntersectionDetail::Build(
 					}
 				}
 			}
-
+			
 			Side.TrafficLightDetailIndex = NearestTrafficLightDetailIndex; // ..may be INDEX_NONE
 			bHasTrafficLights |= (NearestTrafficLightDetailIndex != INDEX_NONE);
 		}

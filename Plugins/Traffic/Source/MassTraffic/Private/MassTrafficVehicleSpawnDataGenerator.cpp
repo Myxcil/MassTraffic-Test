@@ -28,6 +28,12 @@ void UMassTrafficVehicleSpawnDataGenerator::Generate(UObject& QueryOwner,
 	UWorld* World = GetWorld();
 	UMassTrafficSubsystem* MassTrafficSubsystem = UWorld::GetSubsystem<UMassTrafficSubsystem>(World);
 	UZoneGraphSubsystem* ZoneGraphSubsystem = UWorld::GetSubsystem<UZoneGraphSubsystem>(World);
+
+	if (!MassTrafficSubsystem) {
+		UE_LOG(LogTemp, Warning, TEXT("Subsystem is null..."))
+	}
+
+	
 	check(MassTrafficSubsystem);
 	check(ZoneGraphSubsystem);
 
