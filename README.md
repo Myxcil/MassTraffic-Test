@@ -1,8 +1,8 @@
-# TrafficTest - Mass Traffic Plugin for UE ~5.3.2~ 5.4
+# TrafficTest - Mass Traffic Plugin for UE ~~5.3.2 5.4~~ 5.5
 
-I've only forked this repo so I can do some proper research into a non-trivial Mass system, so please don't expect any maintenance! There probably won't be any!
+I've only forked this repo so I can do some proper research into a non-trivial Mass system using the latest 5.5 release, so please don't expect any maintenance! There probably won't be any!
 
-If it doesn't work for you, feel free to fix it :)
+If you can use it, great; if it doesn't work, feel free to fix it :) All credit to the original author and their repo here: https://github.com/Myxcil/MassTraffic-Test
 
 Main 'TODO' at the moment is work out how the traffic lights were originally placed, because the code as-is doesn't appear to be doing what's in the screenshot below.
 
