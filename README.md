@@ -1,10 +1,11 @@
-# TrafficTest - Mass Traffic Plugin for UE ~5.3.2~ 5.4
+# TrafficTest - (modified) Mass Traffic Plugin for UE 5.5
 
 ![Overview](/docs/overview.jpg)
 
 Traffic Plugin extracted from CitySample
 - disabled Niagara compilation error
 - fixed missing include for physics solver
+- support for interacting with regular Chaos Vehicles
 
 Thanks to:
 
@@ -16,6 +17,7 @@ https://www.youtube.com/watch?v=otdm3KhM6vs
 - generate ParkingSpot and TrafficLight data from special actors (editor-only) in the current map
 - removed RuleProcessor and therefore Houdini import for parking spaces and traffic lights
 - upgraded to UE 5.4 codebase
+- separate trait to specify size of entity in config
 
 # Notes:
 
@@ -32,6 +34,7 @@ https://www.youtube.com/watch?v=otdm3KhM6vs
 
 
 ### Minimum intersection configuration
+(not further investigation by me because I need a more "European" approach to traffic lights)
 1. LODCollector
 2. Traffic Intersection Simulation
 3. Traffic Light Visualization
@@ -43,3 +46,9 @@ https://www.youtube.com/watch?v=otdm3KhM6vs
 - MassTrafficSubsystem::ClearAllTrafficLanes() must be called when MassSpwaner::OnDespawningFinished event is fired
   
 ![Blueprint](/docs/despawn_event.jpg)
+
+# Chaos Vehicle <-> MassTraffic 
+MassAgent config for Chaos Vehicles to be recognized as obstacles in MassTrafficProcessor 
+still working on the other way round
+
+![Chaos Vehicle Config](/docs/chaos_vehicle_config.jpg)
