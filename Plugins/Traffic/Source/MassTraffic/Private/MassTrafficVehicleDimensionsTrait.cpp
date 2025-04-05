@@ -2,11 +2,10 @@
 
 #include "MassTrafficVehicleDimensionsTrait.h"
 #include "MassTrafficFragments.h"
-#include "MassTrafficVehicleSimulationTrait.h"
-#include "MassActorSubsystem.h"
 #include "MassEntityTemplateRegistry.h"
 #include "Engine/World.h"
 #include "MassEntityUtils.h"
+#include "MassTrafficVehicleVolumeTrait.h"
 
 
 void UMassTrafficVehicleDimensionsTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContext, const UWorld& World) const
@@ -14,10 +13,10 @@ void UMassTrafficVehicleDimensionsTrait::BuildTemplate(FMassEntityTemplateBuildC
 	FMassEntityManager& EntityManager = UE::Mass::Utils::GetEntityManagerChecked(World);
 
 	// Add simulation config as shared fragment for length and width access.
-	FMassTrafficVehicleSimulationParameters SimulationConfig;
-	SimulationConfig.HalfLength = Params.HalfLength;
-	SimulationConfig.HalfWidth = Params.HalfWidth;
+	FMassTrafficVehicleVolumeParameters ObstacleConfig;
+	ObstacleConfig.HalfLength = Params.HalfLength;
+	ObstacleConfig.HalfWidth = Params.HalfWidth;
 
-	const FConstSharedStruct SimulationConfigSharedFragment = EntityManager.GetOrCreateConstSharedFragment(SimulationConfig);
-	BuildContext.AddConstSharedFragment(SimulationConfigSharedFragment);
+	const FConstSharedStruct ObstacleConfigSharedFragment = EntityManager.GetOrCreateConstSharedFragment(ObstacleConfig);
+	BuildContext.AddConstSharedFragment(ObstacleConfigSharedFragment);
 }

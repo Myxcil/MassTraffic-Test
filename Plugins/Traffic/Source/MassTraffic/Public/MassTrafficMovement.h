@@ -10,6 +10,7 @@
 #include "MassEntityManager.h"
 #include "MassCommonFragments.h"
 #include "MassTrafficSettings.h"
+#include "MassTrafficVehicleVolumeTrait.h"
 #include "MassTrafficVehicleSimulationTrait.h"
 
 
@@ -136,7 +137,7 @@ MASSTRAFFIC_API bool ShouldStopAtLaneExit(
 	float Radius,
 	float RandomFraction,
 	float LaneLength,
-	FZoneGraphTrafficLaneData* NextTrafficLaneData,
+	const FZoneGraphTrafficLaneData* NextTrafficLaneData,
 	const FVector2D& MinimumDistanceToNextVehicleRange,
 	const FMassEntityManager& EntityManager, 
 	bool& bOut_RequestDifferentNextLane,
@@ -158,6 +159,18 @@ MASSTRAFFIC_API bool ShouldStopAtLaneExit(
 	
 MASSTRAFFIC_API float TimeToCollision(const FVector& AgentLocation, const FVector& AgentVelocity, float AgentRadius, const FVector& ObstacleLocation, const FVector& ObstacleVelocity, float ObstacleRadius);
 
+/** Calculate OBB collision for finer avoidance */
+
+MASSTRAFFIC_API  bool WillCollide(
+	const FVector& AgentLocation, const FQuat& AgentRotation, const FVector& AgentVelocity, const float AgentHalfLength, const float AgentHalfWidth,
+	const FVector& ObstacleLocation, const FQuat& ObstacleRotation, const FVector& ObstacleVelocity, const FMassTrafficVehicleVolumeParameters& ObstacleParams,
+	const float TimeToCollide);
+
+MASSTRAFFIC_API bool WillCollide(
+	const FVector& AgentLocation, const FQuat& AgentRotation, const FVector& AgentVelocity, const FMassTrafficVehicleVolumeParameters& AgentParams,
+	const FVector& ObstacleLocation, const FQuat& ObstacleRotation, const FVector& ObstacleVelocity, const FMassTrafficVehicleVolumeParameters& ObstacleParams, const float TimeToCollide);
+
+	
 /** Lane location eval */
 
 FORCEINLINE void CalculateOffsetLocationAlongLane(const FZoneGraphStorage& ZoneGraphStorage, int32 CurrentLaneIndex, float DistanceAlongCurrentLane, float LateralOffset, FZoneGraphLaneLocation& OutLaneLocation)

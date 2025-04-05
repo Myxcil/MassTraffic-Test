@@ -27,7 +27,6 @@ public class MassTrafficEditor : ModuleRules
 				"Engine",
 				"ZoneGraph",
 				"MassTraffic",
-				"StructUtils"
 			}
 			);
 			
@@ -44,6 +43,13 @@ public class MassTrafficEditor : ModuleRules
 				"RenderCore",
 				"RHI",
 				"Blutility",
+				"ComponentVisualizers",
+				"PropertyEditor",
+				"UnrealEd",
+				"LevelEditor",
+				"DetailCustomizations",
+				"InputCore",
+				"EditorStyle",
 			}
 			);
 		

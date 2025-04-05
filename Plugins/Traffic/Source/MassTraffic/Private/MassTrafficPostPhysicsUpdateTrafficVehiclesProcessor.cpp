@@ -23,7 +23,7 @@ UMassTrafficPostPhysicsUpdateTrafficVehiclesProcessor::UMassTrafficPostPhysicsUp
 	// @todo required due to Actor->SetActorTransform, could be addressed by turning it into a command.
 	bRequiresGameThreadExecution = true;
 	bAutoRegisterWithProcessingPhases = true;
-	ExecutionFlags = static_cast<int32>(EProcessorExecutionFlags::All); 
+	ExecutionFlags = static_cast<int32>(EProcessorExecutionFlags::AllNetModes);
 	ExecutionOrder.ExecuteInGroup = UE::MassTraffic::ProcessorGroupNames::PostPhysicsUpdateTrafficVehicles;
 }
 

@@ -13,8 +13,9 @@
 #include "MassExecutionContext.h"
 #include "MassTrafficVehicleSimulationTrait.h"
 #include "ZoneGraphSubsystem.h"
-#include "MassGameplayExternalTraits.h"
+#include "MassTrafficVehicleVolumeTrait.h"
 #include "VisualLogger/VisualLogger.h"
+#include "MassGameplayExternalTraits.h" // KEEP THIS UNDER ALL CIRCUMSTANCES OR ELSE COMPILE WILL FAIL!!!!
 
 void FindNearbyLanes(const FZoneGraphStorage& Storage, const FBox& Bounds, const FZoneGraphTagFilter TagFilter, TArray<int32>& OutLanes)
 {
@@ -52,7 +53,7 @@ void UMassTrafficFindObstaclesProcessor::ConfigureQueries()
 	ObstacleEntityQuery.AddTagRequirement<FMassTrafficObstacleTag>(EMassFragmentPresence::All);
 	ObstacleEntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	ObstacleEntityQuery.AddRequirement<FAgentRadiusFragment>(EMassFragmentAccess::ReadOnly);
-	ObstacleEntityQuery.AddConstSharedRequirement<FMassTrafficVehicleSimulationParameters>(EMassFragmentPresence::Optional);
+	ObstacleEntityQuery.AddConstSharedRequirement<FMassTrafficVehicleVolumeParameters>(EMassFragmentPresence::Optional);
 	ObstacleEntityQuery.AddSubsystemRequirement<UZoneGraphSubsystem>(EMassFragmentAccess::ReadOnly);
 	ObstacleEntityQuery.AddSubsystemRequirement<UMassTrafficSubsystem>(EMassFragmentAccess::ReadOnly);
 
@@ -87,7 +88,7 @@ void UMassTrafficFindObstaclesProcessor::Execute(FMassEntityManager& EntityManag
 			const UMassTrafficSubsystem& MassTrafficSubsystem = QueryContext.GetSubsystemChecked<UMassTrafficSubsystem>();
 			const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
 
-			const FMassTrafficVehicleSimulationParameters* VehicleSimulationParams = QueryContext.GetConstSharedFragmentPtr<FMassTrafficVehicleSimulationParameters>();
+			const FMassTrafficVehicleVolumeParameters* ObstacleParameters = QueryContext.GetConstSharedFragmentPtr<FMassTrafficVehicleVolumeParameters>();
 			const TConstArrayView<FAgentRadiusFragment> AgentRadiusFragments = QueryContext.GetFragmentView<FAgentRadiusFragment>();
 			const TConstArrayView<FTransformFragment> TransformFragments = QueryContext.GetFragmentView<FTransformFragment>();
 
@@ -99,7 +100,7 @@ void UMassTrafficFindObstaclesProcessor::Execute(FMassEntityManager& EntityManag
 				const FAgentRadiusFragment& AgentRadiusFragment = AgentRadiusFragments[Index];
 				const FTransformFragment& TransformFragment = TransformFragments[Index];
 
-				const float AgentWidth = VehicleSimulationParams ? VehicleSimulationParams->HalfWidth : AgentRadiusFragment.Radius;
+				const float AgentWidth = ObstacleParameters ? ObstacleParameters->HalfWidth : AgentRadiusFragment.Radius;
 
 				// Debug draw obstacle
 				#if WITH_MASSTRAFFIC_DEBUG
@@ -172,7 +173,7 @@ void UMassTrafficFindObstaclesProcessor::Execute(FMassEntityManager& EntityManag
 									{
 										UE_VLOG_SEGMENT_THICK(&MassTrafficSubsystem, TEXT("MassTraffic Avoidance"), Log, AvoidingVehicleLocation, TransformFragment.GetTransform().GetLocation(), FColor::Yellow, 5.0f, TEXT("%d Avoiding %d"), PreviousVehicle.Index, ObstacleEntity.Index);
 										const float Radius = PreviousVehicleEntityView.GetFragmentData<FAgentRadiusFragment>().Radius;
-										const float HalfWidth = PreviousVehicleEntityView.GetSharedFragmentData<FMassTrafficVehicleSimulationParameters>().HalfWidth;
+										const float HalfWidth = PreviousVehicleEntityView.GetConstSharedFragmentData<FMassTrafficVehicleVolumeParameters>().HalfWidth;
 
 										DrawDebugBox(GetWorld(),
 											TransformFragment.GetTransform().GetLocation(),

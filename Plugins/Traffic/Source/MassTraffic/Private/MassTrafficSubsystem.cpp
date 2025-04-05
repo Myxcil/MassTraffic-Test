@@ -690,6 +690,17 @@ void UMassTrafficSubsystem::ClearAllTrafficLanes()
 	}
 }
 
+bool UMassTrafficSubsystem::FindNearestLane(const FVector Location, const float MaxRange, FZoneGraphTagFilterEx TagFilter, FZoneGraphLaneLocationEx& LocationOnRoad, float& SqDistance) const
+{
+	if (ZoneGraphSubsystem)
+	{
+		const float HalfRange = 0.5f * MaxRange;
+		const FBox QueryBounds = FBox::BuildAABB(Location, FVector(HalfRange,HalfRange,HalfRange));
+		return ZoneGraphSubsystem->FindNearestLane(QueryBounds, TagFilter, LocationOnRoad, SqDistance);
+	}
+	return false;
+}
+
 void UMassTrafficSubsystem::PerformFieldOperation(TSubclassOf<UMassTrafficFieldOperationBase> OperationType)
 {
 	check(EntityManager);

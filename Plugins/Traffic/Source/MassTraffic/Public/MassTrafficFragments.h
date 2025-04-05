@@ -79,13 +79,6 @@ struct MASSTRAFFIC_API FMassTrafficPlayerVehicleTag : public FMassTag
 	GENERATED_BODY()
 };
 
-/** Tag to indicate that this vehicle is in emergency mode */
-USTRUCT()
-struct MASSTRAFFIC_API FMassTrafficEMVehicleTag : public FMassTag
-{
-	GENERATED_BODY()
-};
-
 USTRUCT()
 struct MASSTRAFFIC_API FMassTrafficRecyclableVehicleTag : public FMassTag
 {
@@ -105,6 +98,12 @@ struct MASSTRAFFIC_API FMassTrafficIntersectionTag : public FMassTag
  */
 USTRUCT()
 struct MASSTRAFFIC_API FMassTrafficObstacleTag : public FMassTag
+{
+	GENERATED_BODY()
+};
+
+USTRUCT()
+struct MASSTRAFFIC_API FMassTrafficEmergencyTag : public FMassTag
 {
 	GENERATED_BODY()
 };
@@ -153,11 +152,12 @@ enum class EMassTrafficLightStateFlags : uint8
 	
 	VehicleGo				= (1 << 0), // ..green for vehicles
 	VehiclePrepareToStop	= (1 << 1), // ..yellow for vehicles
+	VehiclePrepareToGo		= (1 << 2), // ..red+yellow for vehicles
 	// ...                                 ..otherwise red for vehicles
 	
-	PedestrianGo_FrontSide	= (1 << 2), // ..green for pedestrians, on front side of traffic light
-	PedestrianGo_LeftSide 	= (1 << 3), // ..green for pedestrians, on left side of traffic light
-	PedestrianGo_RightSide	= (1 << 4), // ..green for pedestrians, on right side of traffic light
+	PedestrianGo_FrontSide	= (1 << 3), // ..green for pedestrians, on front side of traffic light
+	PedestrianGo_LeftSide 	= (1 << 4), // ..green for pedestrians, on left side of traffic light
+	PedestrianGo_RightSide	= (1 << 5), // ..green for pedestrians, on right side of traffic light
 	PedestrianGo            = (PedestrianGo_FrontSide | PedestrianGo_LeftSide | PedestrianGo_RightSide),
 	// ...                                 ..otherwise red for pedestrians
 
@@ -233,8 +233,8 @@ struct MASSTRAFFIC_API FMassTrafficLightControl
 	
 	bool bIsValid : 1;	
 	bool bWillAllVehicleLanesCloseInNextPeriodForThisTrafficLight : 1;	
-	EMassTrafficLightStateFlags TrafficLightStateFlags : 5; // (See all LIGHTSTATEBITS.)
-	// ..7..
+	EMassTrafficLightStateFlags TrafficLightStateFlags : 6; // (See all LIGHTSTATEBITS.)
+	// ..8..
 };
 
 
@@ -696,6 +696,7 @@ struct MASSTRAFFIC_API FMassTrafficVehicleControlFragment : public FMassFragment
 	
 	float PreviousLaneLength = 0.0f;
 
+	// -1.0 to 1.0 
 	float EmergencyOffset = 0.0f;
 };
 
@@ -948,7 +949,7 @@ struct MASSTRAFFIC_API FMassTrafficAngularVelocityFragment : public FMassFragmen
 
 
 USTRUCT()
-struct MASSTRAFFIC_API FMassTrafficVehiclePhysicsSharedParameters : public FMassSharedFragment
+struct MASSTRAFFIC_API FMassTrafficVehiclePhysicsSharedParameters : public FMassConstSharedFragment
 {
 	GENERATED_BODY()
 

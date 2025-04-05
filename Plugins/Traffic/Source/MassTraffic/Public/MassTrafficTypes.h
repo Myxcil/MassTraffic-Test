@@ -469,6 +469,7 @@ struct MASSTRAFFIC_API FZoneGraphTrafficLaneData
 	bool bIsDownstreamFromIntersection : 1;
 	bool bIsStoppedVehicleInPreviousLaneOverlappingThisLane : 1; // (See all CROSSWALKOVERLAP.)
 	bool bIsVehicleReadyToUseLane : 1; // (See all READYLANE.)
+	bool bIsEmergencyLane : 1;
 
 	UE::MassTraffic::TFraction<true, uint8> FractionUntilClosed;
 

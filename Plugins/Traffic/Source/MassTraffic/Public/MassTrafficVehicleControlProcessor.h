@@ -39,6 +39,7 @@ protected:
 
 	void PIDVehicleControl(
 		const FMassEntityManager& EntityManager,
+		const UMassTrafficSubsystem& MassTrafficSubsystem,
 		const FMassExecutionContext& Context,
 		const int32 EntityIndex,
 		const FZoneGraphStorage& ZoneGraphStorage,

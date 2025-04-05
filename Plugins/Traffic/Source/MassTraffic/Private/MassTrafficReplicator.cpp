@@ -7,7 +7,7 @@
 #include "MassTrafficBubble.h"
 #include "MassSimulationSettings.h"
 #include "MassLODSubsystem.h"
-#include "InstancedStruct.h"
+#include "StructUtils/InstancedStruct.h"
 #include "MassTrafficFragments.h"
 #include "MassReplicationTransformHandlers.h"
 #include "MassExecutionContext.h"

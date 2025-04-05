@@ -116,7 +116,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct MASSTRAFFIC_API FMassTrafficLightsParameters : public FMassSharedFragment
+struct MASSTRAFFIC_API FMassTrafficLightsParameters : public FMassConstSharedFragment
 {
 	GENERATED_BODY()
 	

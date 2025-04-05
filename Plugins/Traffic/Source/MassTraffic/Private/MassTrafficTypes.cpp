@@ -19,6 +19,7 @@ FZoneGraphTrafficLaneData::FZoneGraphTrafficLaneData():
 	bIsDownstreamFromIntersection(false),
 	bIsStoppedVehicleInPreviousLaneOverlappingThisLane(false),
 	bIsVehicleReadyToUseLane(false),
+	bIsEmergencyLane(false),
 	MaxDensity(1.0f)
 {
 }

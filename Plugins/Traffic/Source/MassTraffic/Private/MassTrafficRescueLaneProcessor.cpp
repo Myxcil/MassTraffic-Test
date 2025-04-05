@@ -1,11 +1,12 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// (c) 2024 by Crenetic GmbH Studios
 
 
 #include "MassTrafficRescueLaneProcessor.h"
 
 #include "MassExecutionContext.h"
 #include "MassZoneGraphNavigationFragments.h"
-
+#include "MassTrafficVehicleVolumeTrait.h"
+#include "MassGameplayExternalTraits.h" // KEEP THIS UNDER ALL CIRCUMSTANCES OR ELSE COMPILE WILL FAIL!!!!
 
 
 UMassTrafficRescueLaneProcessor::UMassTrafficRescueLaneProcessor() :
@@ -20,21 +21,23 @@ UMassTrafficRescueLaneProcessor::UMassTrafficRescueLaneProcessor() :
 
 void UMassTrafficRescueLaneProcessor::ConfigureQueries()
 {
-	EMVehicleQuery.AddTagRequirement<FMassTrafficEMVehicleTag>(EMassFragmentPresence::Any);
+	EMVehicleQuery.AddTagRequirement<FMassTrafficObstacleTag>(EMassFragmentPresence::All);
+	EMVehicleQuery.AddTagRequirement<FMassTrafficEmergencyTag>(EMassFragmentPresence::All);
 	EMVehicleQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
-
+	EMVehicleQuery.AddConstSharedRequirement<FMassTrafficVehicleVolumeParameters>();
+	
 	VehicleQuery.AddTagRequirement<FMassTrafficVehicleTag>(EMassFragmentPresence::Any);
 	VehicleQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	VehicleQuery.AddRequirement<FMassZoneGraphLaneLocationFragment>(EMassFragmentAccess::ReadOnly);
 	VehicleQuery.AddRequirement<FMassTrafficVehicleControlFragment>(EMassFragmentAccess::ReadWrite);
 	VehicleQuery.AddRequirement<FMassTrafficVehicleLightsFragment>(EMassFragmentAccess::ReadWrite);
 
-	ProcessorRequirements.AddSubsystemRequirement<UMassTrafficSubsystem>(EMassFragmentAccess::ReadWrite);
+	ProcessorRequirements.AddSubsystemRequirement<UMassTrafficSubsystem>(EMassFragmentAccess::ReadOnly);
 }
 
 void UMassTrafficRescueLaneProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	const UMassTrafficSubsystem& MassTrafficSubsystem = Context.GetMutableSubsystemChecked<UMassTrafficSubsystem>();
+	const UMassTrafficSubsystem& MassTrafficSubsystem = Context.GetSubsystemChecked<UMassTrafficSubsystem>();
 	
 	// first, get all the active EM vehicles
 	TArray<FMassEntityHandle> EMVehicles;
@@ -48,9 +51,8 @@ void UMassTrafficRescueLaneProcessor::Execute(FMassEntityManager& EntityManager,
 	});
 
 	const int32 NumEMVehicles = EMVehicles.Num();
-	constexpr double EMRecognitionDistance = 5000.0f;
-	constexpr double EMRecognitionDistanceSquared = EMRecognitionDistance * EMRecognitionDistance;
-	
+	const float EMRecognitionDistanceSquared = MassTrafficSettings->RescueLaneEMRecognitionDistance * MassTrafficSettings->RescueLaneEMRecognitionDistance;
+
 	VehicleQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
 	{
 		const TConstArrayView<FTransformFragment> TransformFragments = QueryContext.GetFragmentView<FTransformFragment>();
@@ -61,71 +63,65 @@ void UMassTrafficRescueLaneProcessor::Execute(FMassEntityManager& EntityManager,
 		const int32 NumEntities = QueryContext.GetNumEntities();
 		for(int32 EntityIndex = 0; EntityIndex < NumEntities; ++EntityIndex)
 		{
-			FMassEntityHandle EntityHandle = QueryContext.GetEntity(EntityIndex);
+			// only check if the vehicle is NOT an emergency vehicle
+			const FTransformFragment& TransformFragment = TransformFragments[EntityIndex];
+			const FTransform& EntityTransform = TransformFragment.GetTransform();
+			const FVector EntityFwd = EntityTransform.GetRotation().GetForwardVector();
 
-			// only check if the vehicle IS not an emergency vehicle
-			const bool IsEMVehicle = EMVehicles.Contains(EntityHandle);
-			if (!IsEMVehicle)
+			// find nearest emergency vehicle that can make this entity to get out of the way
+			double SqMinDist = EMRecognitionDistanceSquared;
+
+			FMassEntityHandle NearestEMVehicle;
+			FVector NearestEMPosition = FVector(0,0,0);
+			for(int32 EMIndex = 0; EMIndex < NumEMVehicles; ++EMIndex)
 			{
-				const FTransformFragment& TransformFragment = TransformFragments[EntityIndex];
-				const FTransform& EntityTransform = TransformFragment.GetTransform();
-				const FVector EntityFwd = EntityTransform.GetRotation().RotateVector(FVector::ForwardVector);
+				const FMassEntityHandle EMHandle = EMVehicles[EMIndex];
+			
+				const FTransformFragment& EMTransformFragment = EntityManager.GetFragmentDataChecked<FTransformFragment>(EMHandle);
+				const FTransform& EMTransform = EMTransformFragment.GetTransform();
+				const FVector EMForward = EMTransform.GetRotation().GetForwardVector();
 
-				// find nearest emergency vehicle that can make this entity to get out of the way
-				double SqMinDist = EMRecognitionDistanceSquared;
-
-				FMassEntityHandle NearestEMVehicle;
-				for(int32 EMIndex = 0; EMIndex < NumEMVehicles; ++EMIndex)
+				if (FVector::DotProduct(EntityFwd, EMForward) > 0)
 				{
-					const FMassEntityHandle EMHandle = EMVehicles[EMIndex];
-				
-					const FTransformFragment& EMTransformFragment = EntityManager.GetFragmentDataChecked<FTransformFragment>(EMHandle);
-					const FTransform& EMTransform = EMTransformFragment.GetTransform();
-					const FVector EMForward = EMTransform.GetRotation().RotateVector(FVector::ForwardVector);
+					const FVector EMPosition = EMTransform.GetLocation();
+					const FVector EntityPosition = EntityTransform.GetLocation();
 
-					if (FVector::DotProduct(EntityFwd, EMForward) > 0.707f)
+					const double SqDist = FVector::DistSquared(EMPosition, EntityPosition); 
+					if (SqDist < SqMinDist)
 					{
-						const FVector EMPosition = EMTransform.GetLocation();
-						const FVector EntityPosition = EntityTransform.GetLocation();
-
-						const double SqDist = FVector::DistSquared(EMPosition, EntityPosition); 
-						if (SqDist < SqMinDist)
-						{
-							SqMinDist = SqDist;
-							NearestEMVehicle = EMHandle; 
-						}
+						SqMinDist = SqDist;
+						NearestEMVehicle = EMHandle;
+						NearestEMPosition = EMPosition;
 					}
 				}
-				
-				FMassTrafficVehicleControlFragment& VehicleControlFragment = VehicleControlFragments[EntityIndex];
-				FMassTrafficVehicleLightsFragment& VehicleLightsFragment = VehicleLightsFragments[EntityIndex];
-				
-				if (!NearestEMVehicle.IsValid())
+			}
+			
+			FMassTrafficVehicleControlFragment& VehicleControlFragment = VehicleControlFragments[EntityIndex];
+
+			if (NearestEMVehicle.IsValid())
+			{
+				const FMassZoneGraphLaneLocationFragment& LaneLocationFragment= LaneLocationFragments[EntityIndex];
+				const FZoneGraphTrafficLaneData* TrafficLaneData = MassTrafficSubsystem.GetTrafficLaneData(LaneLocationFragment.LaneHandle);
+				if (TrafficLaneData && TrafficLaneData->bIsEmergencyLane)
 				{
-					if (VehicleControlFragment.EmergencyOffset != 0)
-					{
-						VehicleControlFragment.EmergencyOffset = 0.0f;
-						VehicleLightsFragment.bLeftTurnSignalLights = false;
-						VehicleLightsFragment.bRightTurnSignalLights = false;
-					}
+					VehicleControlFragment.EmergencyOffset = TrafficLaneData->bIsRightMostLane ? 1.0f : -1.0f;
 				}
 				else
 				{
-					const FMassZoneGraphLaneLocationFragment& LaneLocationFragment = LaneLocationFragments[EntityIndex];
-					const FZoneGraphTrafficLaneData* EntityLane = MassTrafficSubsystem.GetTrafficLaneData(LaneLocationFragment.LaneHandle);
-					if (EntityLane != nullptr && !EntityLane->bIsRightMostLane)
-					{
-						VehicleControlFragment.EmergencyOffset = -MassTrafficSettings->RescueLaneEvasion; 
-					}
-					else
-					{
-						VehicleControlFragment.EmergencyOffset = MassTrafficSettings->RescueLaneEvasion;
-					}
-
-					VehicleLightsFragment.bLeftTurnSignalLights = true;
-					VehicleLightsFragment.bRightTurnSignalLights = true;
+					const FVector ToLane = NearestEMPosition - EntityTransform.GetLocation();
+					const FVector Cross = FVector::CrossProduct(EntityFwd, ToLane);
+					VehicleControlFragment.EmergencyOffset = -FMath::Sign(FVector::DotProduct(Cross, FVector::UpVector));
 				}
 			}
+			else
+			{
+				VehicleControlFragment.EmergencyOffset = 0.0f;
+			}
+
+			FMassTrafficVehicleLightsFragment& VehicleLightsFragment = VehicleLightsFragments[EntityIndex];
+			const bool bWarnLightsOn = VehicleControlFragment.EmergencyOffset != 0;
+			VehicleLightsFragment.bLeftTurnSignalLights = bWarnLightsOn;
+			VehicleLightsFragment.bRightTurnSignalLights = bWarnLightsOn;
 		}
 	});
 }

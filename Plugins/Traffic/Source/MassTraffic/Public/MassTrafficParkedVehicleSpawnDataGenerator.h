@@ -2,11 +2,8 @@
 
 #pragma once
 
-#include "MassTrafficSettings.h"
-
 #include "CoreMinimal.h"
 #include "MassEntitySpawnDataGeneratorBase.h"
-#include "ZoneGraphTypes.h"
 
 #include "MassTrafficParkedVehicleSpawnDataGenerator.generated.h"
 
@@ -21,9 +18,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TMap<TSoftObjectPtr<UMassEntityConfigAsset>, FName> EntityTypeToParkingSpaceType;
 
-	/** Data Asset storing parking space transforms that parked vehicles can spawn in */  
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UMassTrafficParkingSpacesDataAsset> ParkingSpaces;
+	FName DefaultParkingSpaceType;
 
 	/**
 	 * If true, the input Count is ignored and vehicles will be spawned in every parking space in ParkingSpaces.

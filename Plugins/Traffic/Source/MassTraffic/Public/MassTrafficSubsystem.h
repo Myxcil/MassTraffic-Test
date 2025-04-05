@@ -17,6 +17,19 @@ class UMassTrafficFieldComponent;
 class UMassTrafficFieldOperationBase;
 struct FMassEntityManager;
 
+USTRUCT(Blueprintable)
+struct FZoneGraphTagFilterEx : public FZoneGraphTagFilter
+{
+	GENERATED_BODY()
+};
+
+USTRUCT(Blueprintable)
+struct FZoneGraphLaneLocationEx : public FZoneGraphLaneLocation
+{
+	GENERATED_BODY()
+	
+};
+
 /**
  * Subsystem that tracks mass traffic entities driving on the zone graph.
  * 
@@ -103,6 +116,10 @@ public:
 	/** Clear all traffic lanes of their vehicle data. Must be called after deleting all vehicle agents */   
 	UFUNCTION(BlueprintCallable, Category="Mass Traffic")
 	void ClearAllTrafficLanes();
+
+	/** Find lane **/
+	UFUNCTION(BlueprintCallable, Category="Mass Traffic")
+	bool FindNearestLane(const FVector Location, const float MaxRange, FZoneGraphTagFilterEx TagFilter, FZoneGraphLaneLocationEx& LocationOnRoad, float& SqDistance) const;
 	
 	/** Returns all registered traffic fields */ 
 	const TArray<TObjectPtr<UMassTrafficFieldComponent>>& GetFields() const

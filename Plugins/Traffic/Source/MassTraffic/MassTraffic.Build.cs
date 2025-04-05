@@ -50,7 +50,6 @@ public class MassTraffic : ModuleRules
 				"Engine",
 				"NetCore",
 				"StateTreeModule",
-				"StructUtils",
 				"ZoneGraph",
 				"AnimToTexture",
 				"ChaosVehicles",
@@ -76,7 +75,7 @@ public class MassTraffic : ModuleRules
 				"SlateCore",
 				"PhysicsCore",
 				"Chaos",
-				"ChaosCore",
+				"ChaosCore", 
 			}
 			);
 		

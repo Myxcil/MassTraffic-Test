@@ -20,6 +20,7 @@
 #include "VisualLogger/VisualLogger.h"
 #include "ZoneGraphSubsystem.h"
 #include "MassGameplayExternalTraits.h"
+#include "MassTrafficVehicleVolumeTrait.h"
 
 
 UMassTrafficFindDeviantTrafficVehiclesProcessor::UMassTrafficFindDeviantTrafficVehiclesProcessor()
@@ -50,7 +51,7 @@ void UMassTrafficFindDeviantTrafficVehiclesProcessor::ConfigureQueries()
 	NominalTrafficVehicleEntityQuery.AddRequirement<FMassTrafficVehicleLaneChangeFragment>(EMassFragmentAccess::ReadWrite);
 	NominalTrafficVehicleEntityQuery.AddRequirement<FMassTrafficNextVehicleFragment>(EMassFragmentAccess::ReadWrite);
 	NominalTrafficVehicleEntityQuery.AddRequirement<FAgentRadiusFragment>(EMassFragmentAccess::ReadOnly);
-	NominalTrafficVehicleEntityQuery.AddConstSharedRequirement<FMassTrafficVehicleSimulationParameters>();
+	NominalTrafficVehicleEntityQuery.AddConstSharedRequirement<FMassTrafficVehicleVolumeParameters>();
 	NominalTrafficVehicleEntityQuery.AddSubsystemRequirement<UZoneGraphSubsystem>(EMassFragmentAccess::ReadOnly);
 
 	// Known deviant physics vehicles which we check for correction
@@ -106,7 +107,7 @@ void UMassTrafficFindDeviantTrafficVehiclesProcessor::Execute(FMassEntityManager
 	{
 		const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
 
-		const FMassTrafficVehicleSimulationParameters& SimulationParams = QueryContext.GetConstSharedFragment<FMassTrafficVehicleSimulationParameters>();
+		const FMassTrafficVehicleVolumeParameters& ObstacleParameters = QueryContext.GetConstSharedFragment<FMassTrafficVehicleVolumeParameters>();
 		const TConstArrayView<FMassActorFragment> ActorFragments = QueryContext.GetFragmentView<FMassActorFragment>();
 		const TConstArrayView<FMassRepresentationFragment> RepresentationFragments = QueryContext.GetFragmentView<FMassRepresentationFragment>();
 		const TConstArrayView<FMassTrafficLaneOffsetFragment> LaneOffsetFragments = QueryContext.GetFragmentView<FMassTrafficLaneOffsetFragment>();
@@ -172,7 +173,7 @@ void UMassTrafficFindDeviantTrafficVehiclesProcessor::Execute(FMassEntityManager
 						, FMassCrowdObstacleFragment>>						// Needed to be a zone graph dynamic obstacle
 						(Entity);
 
-					FMassPillCollider Pill(SimulationParams.HalfWidth, SimulationParams.HalfLength);
+					FMassPillCollider Pill(ObstacleParameters.HalfWidth, ObstacleParameters.HalfLength);
 					FMassAvoidanceColliderFragment ColliderFragment(Pill);
 					QueryContext.Defer().PushCommand<FMassCommandAddFragmentInstances>(Entity, ColliderFragment);
 

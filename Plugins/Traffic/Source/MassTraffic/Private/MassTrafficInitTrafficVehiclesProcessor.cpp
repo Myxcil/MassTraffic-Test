@@ -9,6 +9,7 @@
 #include "MassReplicationSubsystem.h"
 #include "MassReplicationFragments.h"
 #include "MassRepresentationFragments.h"
+#include "MassTrafficVehicleVolumeTrait.h"
 #include "MassTrafficVehicleSimulationTrait.h"
 #include "MassZoneGraphNavigationFragments.h"
 #include "ZoneGraphTypes.h"
@@ -31,7 +32,7 @@ void UMassTrafficInitTrafficVehiclesProcessor::ConfigureQueries()
 	EntityQuery.AddRequirement<FMassTrafficVehicleControlFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassZoneGraphLaneLocationFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassNetworkIDFragment>(EMassFragmentAccess::ReadWrite, EMassFragmentPresence::Optional);
-	EntityQuery.AddConstSharedRequirement<FMassTrafficVehicleSimulationParameters>();
+	EntityQuery.AddConstSharedRequirement<FMassTrafficVehicleVolumeParameters>();
 	EntityQuery.AddSubsystemRequirement<UMassTrafficSubsystem>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddSubsystemRequirement<UMassReplicationSubsystem>(EMassFragmentAccess::ReadWrite);
 }
@@ -83,7 +84,7 @@ void UMassTrafficInitTrafficVehiclesProcessor::Execute(FMassEntityManager& Entit
 		UMassTrafficSubsystem& MassTrafficSubsystem = QueryContext.GetMutableSubsystemChecked<UMassTrafficSubsystem>();
 
 		const int32 NumEntities = QueryContext.GetNumEntities();
-		const FMassTrafficVehicleSimulationParameters& SimulationParams = QueryContext.GetConstSharedFragment<FMassTrafficVehicleSimulationParameters>();
+		const FMassTrafficVehicleVolumeParameters& ObstacleParameters = QueryContext.GetConstSharedFragment<FMassTrafficVehicleVolumeParameters>();
 		const TArrayView<FMassRepresentationFragment> RepresentationFragments = QueryContext.GetMutableFragmentView<FMassRepresentationFragment>();
 		const TArrayView<FMassTrafficVehicleControlFragment> VehicleControlFragments = QueryContext.GetMutableFragmentView<FMassTrafficVehicleControlFragment>();
 		const TArrayView<FMassZoneGraphLaneLocationFragment> LaneLocationFragments = QueryContext.GetMutableFragmentView<FMassZoneGraphLaneLocationFragment>();
@@ -136,7 +137,7 @@ void UMassTrafficInitTrafficVehiclesProcessor::Execute(FMassEntityManager& Entit
 			}
 			
 			// Consume available space on the assigned lane
-			const float SpaceTakenByVehicleOnLane = GetSpaceTakenByVehicleOnLane(SimulationParams.HalfLength, RandomFractionFragment.RandomFraction, MassTrafficSettings->MinimumDistanceToNextVehicleRange);
+			const float SpaceTakenByVehicleOnLane = GetSpaceTakenByVehicleOnLane(ObstacleParameters.HalfLength, RandomFractionFragment.RandomFraction, MassTrafficSettings->MinimumDistanceToNextVehicleRange);
 			TrafficLaneData.AddVehicleOccupancy(SpaceTakenByVehicleOnLane);
 
 			// Init TransformFragment

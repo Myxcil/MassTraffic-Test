@@ -1,12 +1,15 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficIntersectionSpawnDataGenerator.h"
+
+#include "EngineUtils.h"
 #include "MassCommonUtils.h"
 #include "MassTrafficLaneChange.h"
+#include "MassTrafficLightActor.h"
+#include "MassTrafficParkingSpotActor.h"
 
 #include "VisualLogger/VisualLogger.h"
 #if WITH_EDITOR
-#include "Misc/DefaultValueHelper.h"
 #include "Misc/ScopedSlowTask.h"
 #endif
 
@@ -52,10 +55,6 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 	if (!TrafficLightTypesData)
 	{
 		UE_LOG(LogMassTraffic, Warning, TEXT("No TrafficLightTypesData asset specified, no traffic lights will be drawn at intersections."))
-	}
-	if (!TrafficLightInstanceData)
-	{
-		UE_LOG(LogMassTraffic, Warning, TEXT("No TrafficLightInstanceData asset specified, no traffic lights will be drawn at intersections."))
 	}
 	
 	// Get subsystems
@@ -225,19 +224,40 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 		// Build intersections.
 		// All intersections must have their sides added, with their lane fragments, before this is called.
 		//
+		TArray<FMassTrafficLightInstanceDesc> TrafficLightInstances;
+		for(TActorIterator<AMassTrafficLightActor> It(World); It; ++It)
+		{
+			const FTransform& Transform = It->GetTransform(); 
+		
+			int16 TrafficLightTypeIndex = It->GetTrafficLightTypeIndex();
+			if (TrafficLightTypeIndex == INDEX_NONE)
+			{
+				TrafficLightTypeIndex = FMath::RandHelper(TrafficLightTypesData->TrafficLightTypes.Num());
+			}
+
+			const FVector ControlledIntersectionSideMidpoint = Transform.GetLocation();
+
+			const FVector TrafficLightPosition = Transform.GetLocation();
+			const FQuat TrafficLightRotation = Transform.GetRotation();
+	
+			float TrafficLightZRotation;
+			const FRotator Rotator(TrafficLightRotation);
+			const FVector Euler = Rotator.Euler();
+			TrafficLightZRotation = Euler.Z;
+
+			TrafficLightInstances.Add(FMassTrafficLightInstanceDesc(TrafficLightPosition, TrafficLightZRotation, ControlledIntersectionSideMidpoint, TrafficLightTypeIndex));
+		}
+		
 		{
 			// Build HGrid from midpoints of of the intersection sides - stored in the traffic light details.
 			// We need this to build the intersections.
 
 			UE::MassTraffic::FMassTrafficBasicHGrid IntersectionSideHGrid;
 			{
-				if (IsValid(TrafficLightInstanceData))
+				for (int32 TrafficLightDetailIndex = 0; TrafficLightDetailIndex < TrafficLightInstances.Num(); TrafficLightDetailIndex++)
 				{
-					for (int32 TrafficLightDetailIndex = 0; TrafficLightDetailIndex < TrafficLightInstanceData->TrafficLights.Num(); TrafficLightDetailIndex++)
-					{
-						const FMassTrafficLightInstanceDesc& TrafficLightDetail = TrafficLightInstanceData->TrafficLights[TrafficLightDetailIndex];
-						IntersectionSideHGrid.Add(TrafficLightDetailIndex, FBox::BuildAABB(TrafficLightDetail.ControlledIntersectionSideMidpoint, FVector::ZeroVector));
-					}
+					const FMassTrafficLightInstanceDesc& TrafficLightDetail = TrafficLightInstances[TrafficLightDetailIndex];
+					IntersectionSideHGrid.Add(TrafficLightDetailIndex, FBox::BuildAABB(TrafficLightDetail.ControlledIntersectionSideMidpoint, FVector::ZeroVector));
 				}
 			}
 
@@ -276,7 +296,7 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 				IntersectionDetail->Build(
 					IntersectionFragment.ZoneIndex,
 					CrosswalkLaneMidpoint_HGrid, IntersectionSideToCrosswalkSearchDistance,
-					IntersectionSideHGrid, TrafficLightInstanceData ? &TrafficLightInstanceData->TrafficLights : nullptr, TrafficLightSearchDistance,
+					IntersectionSideHGrid, TrafficLightInstances.Num() > 0 ? &TrafficLightInstances : nullptr, TrafficLightSearchDistance,
 					*ZoneGraphStorage, World);
 			}			
 		}
@@ -323,8 +343,7 @@ void UMassTrafficIntersectionSpawnDataGenerator::Generate(UObject& QueryOwner, T
 					{
 						int32 NumLogicalLanes = GetNumLogicalLanesForIntersectionSide(*ZoneGraphStorage, Side);
 
-						check(TrafficLightInstanceData);
-						const FMassTrafficLightInstanceDesc& TrafficLightDetail = TrafficLightInstanceData->TrafficLights[TrafficLightDetailIndex];
+						const FMassTrafficLightInstanceDesc& TrafficLightDetail = TrafficLightInstances[TrafficLightDetailIndex];
 
 						// Do we have a pre-selected light type?
 						int16 TrafficLightTypeIndex = TrafficLightDetail.TrafficLightTypeIndex;

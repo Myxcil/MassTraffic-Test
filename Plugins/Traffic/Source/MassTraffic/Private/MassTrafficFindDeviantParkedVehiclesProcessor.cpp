@@ -10,6 +10,7 @@
 #include "MassCommonFragments.h"
 #include "MassExecutionContext.h"
 #include "MassLookAtFragments.h"
+#include "MassTrafficVehicleVolumeTrait.h"
 #include "MassTrafficVehicleSimulationTrait.h"
 #include "VisualLogger/VisualLogger.h"
 
@@ -28,7 +29,7 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::ConfigureQueries()
 	NominalParkedVehicleEntityQuery.AddTagRequirement<FMassVisibilityCulledByDistanceTag>(EMassFragmentPresence::None);
 	NominalParkedVehicleEntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	NominalParkedVehicleEntityQuery.AddRequirement<FMassActorFragment>(EMassFragmentAccess::ReadOnly);
-	NominalParkedVehicleEntityQuery.AddConstSharedRequirement<FMassTrafficVehicleSimulationParameters>();
+	NominalParkedVehicleEntityQuery.AddConstSharedRequirement<FMassTrafficVehicleVolumeParameters>();
 }
 
 void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -36,7 +37,7 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager&
 	// Look for deviant vehicles
 	NominalParkedVehicleEntityQuery.ForEachEntityChunk(EntityManager, Context, [this](FMassExecutionContext& QueryContext)
 	{
-		const FMassTrafficVehicleSimulationParameters& SimulationParams = QueryContext.GetConstSharedFragment<FMassTrafficVehicleSimulationParameters>();
+		const FMassTrafficVehicleVolumeParameters& ObstacleParameters = QueryContext.GetConstSharedFragment<FMassTrafficVehicleVolumeParameters>();
 		const TConstArrayView<FTransformFragment> TransformFragments = QueryContext.GetFragmentView<FTransformFragment>();
 		const TConstArrayView<FMassActorFragment> ActorFragments = QueryContext.GetFragmentView<FMassActorFragment>();
 
@@ -73,11 +74,11 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager&
 						(ParkedVehicleEntity);
 
 					// Add avoidance collider data for crowd system.
-					FMassPillCollider Pill(SimulationParams.HalfWidth, SimulationParams.HalfLength);
+					FMassPillCollider Pill(ObstacleParameters.HalfWidth, ObstacleParameters.HalfLength);
 					FMassAvoidanceColliderFragment ColliderFragment(Pill);
 					// Add the vehicle radius fragment for obstacle avoidance.
 					FAgentRadiusFragment RadiusFragment;
-					RadiusFragment.Radius = SimulationParams.HalfLength;
+					RadiusFragment.Radius = ObstacleParameters.HalfLength;
 					QueryContext.Defer().PushCommand<FMassCommandAddFragmentInstances>(ParkedVehicleEntity, ColliderFragment, RadiusFragment);
 
 					// Debug

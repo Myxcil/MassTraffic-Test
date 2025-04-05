@@ -283,9 +283,13 @@ void UMassTrafficChooseNextLaneProcessor::Execute(FMassEntityManager& EntityMana
 				MassTrafficSettings->MinimumDistanceToNextVehicleRange);
 
 
-			FZoneGraphTrafficLaneData* BestNextTrafficLaneData = nullptr;
+			// MK: instead of a single best lane, which usually ends up in a repeating pattern,
+			// we collect up to 8 lanes as long as their density matches the best density
+			// and choose a random one in the end
+			constexpr int32 MaxBestNextLanes = 6;
+			TStaticArray<FZoneGraphTrafficLaneData*, MaxBestNextLanes> BestNextTrafficLaneDataArray;
+			int32 BestLaneIndex = 0;
 			float BestNextLaneDensity = TNumericLimits<float>::Max();
-
 		
 			// This lane might be have intersection lanes as next lanes, so lets run through just those and asses the
 			// lane they are connected to.
@@ -324,8 +328,12 @@ void UMassTrafficChooseNextLaneProcessor::Execute(FMassEntityManager& EntityMana
 						NextLane->FunctionalDensity();
 					if (NextLaneDensity <= BestNextLaneDensity)
 					{
+						if (NextLaneDensity < BestNextLaneDensity || BestLaneIndex >= BestNextTrafficLaneDataArray.Num())
+						{
+							BestLaneIndex = 0;
+						}
 						BestNextLaneDensity = NextLaneDensity;
-						BestNextTrafficLaneData = NextLane;
+						BestNextTrafficLaneDataArray[BestLaneIndex++] = NextLane;
 					}
 				}
 				else // This is an intersection lane.
@@ -368,8 +376,12 @@ void UMassTrafficChooseNextLaneProcessor::Execute(FMassEntityManager& EntityMana
 						// We are searching the lanes after the intersection so we know which
 						// intersection lane to take. That's why NextLane is being set to
 						// IntersectionTrafficLaneData and not PostIntersectionTrafficLaneData.
+						if (PostIntersectionLaneDensity < BestNextLaneDensity || BestLaneIndex >= BestNextTrafficLaneDataArray.Num())
+						{
+							BestLaneIndex = 0;
+						}
 						BestNextLaneDensity = PostIntersectionLaneDensity;
-						BestNextTrafficLaneData = NextLane;
+						BestNextTrafficLaneDataArray[BestLaneIndex++] = NextLane;
 					}
 				}
 			}
@@ -380,10 +392,24 @@ void UMassTrafficChooseNextLaneProcessor::Execute(FMassEntityManager& EntityMana
 			// should not be expensive.
 			CurrentLane.UpdateDownstreamFlowDensity(MassTrafficSettings->DownstreamFlowDensityMixtureFraction);
 
-
-			if (BestNextTrafficLaneData)
+			if (BestLaneIndex > 0)
 			{
-				VehicleControlFragment.NextLane = BestNextTrafficLaneData;
+				if (!MassTrafficSettings->LaneChangeNextLaneRandom)
+				{
+					VehicleControlFragment.NextLane = BestNextTrafficLaneDataArray[BestLaneIndex-1];
+				}
+				else
+				{
+					if (BestLaneIndex == 1)
+					{
+						VehicleControlFragment.NextLane = BestNextTrafficLaneDataArray[0];
+					}
+					else
+					{
+						const int32 RandomLaneIndex = RandomStream.RandRange(0,BestLaneIndex-1);
+						VehicleControlFragment.NextLane = BestNextTrafficLaneDataArray[RandomLaneIndex];
+					}
+				}
 				VehicleControlFragment.ChooseNextLanePreference = EMassTrafficChooseNextLanePreference::KeepCurrentNextLane;
 			}
 			else

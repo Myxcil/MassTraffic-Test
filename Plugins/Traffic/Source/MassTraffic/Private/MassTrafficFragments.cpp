@@ -40,6 +40,10 @@ FColor FMassTrafficLight::GetDebugColorForVehicles() const
 	{
 		return FColor::Yellow;
 	}
+	if ((TrafficLightStateFlags & EMassTrafficLightStateFlags::VehiclePrepareToGo) != EMassTrafficLightStateFlags::None)
+	{
+		return FColor::Orange;
+	}
 
 	return FColor::Red;
 }

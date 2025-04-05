@@ -9,7 +9,6 @@
 
 #if WITH_EDITOR
 #include "Engine/StaticMesh.h"
-#include "Misc/DefaultValueHelper.h"
 #include "Misc/ScopedSlowTask.h"
 #endif
 

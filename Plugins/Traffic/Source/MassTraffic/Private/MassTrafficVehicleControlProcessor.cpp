@@ -154,6 +154,7 @@ void UMassTrafficVehicleControlProcessor::ConfigureQueries()
 	PIDVehicleControlEntityQuery_Conditional.AddChunkRequirement<FMassSimulationVariableTickChunkFragment>(EMassFragmentAccess::ReadOnly);
 	PIDVehicleControlEntityQuery_Conditional.SetChunkFilter(FMassSimulationVariableTickChunkFragment::ShouldTickChunkThisFrame);
 	PIDVehicleControlEntityQuery_Conditional.AddSubsystemRequirement<UZoneGraphSubsystem>(EMassFragmentAccess::ReadOnly);
+	PIDVehicleControlEntityQuery_Conditional.AddSubsystemRequirement<UMassTrafficSubsystem>(EMassFragmentAccess::ReadOnly);
 }
 
 
@@ -217,6 +218,7 @@ void UMassTrafficVehicleControlProcessor::Execute(FMassEntityManager& EntityMana
 	PIDVehicleControlEntityQuery_Conditional.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& ComponentSystemExecutionContext)
 		{
 			const UZoneGraphSubsystem& ZoneGraphSubsystem = ComponentSystemExecutionContext.GetSubsystemChecked<UZoneGraphSubsystem>();
+			const UMassTrafficSubsystem& MassTrafficSubsystem = ComponentSystemExecutionContext.GetSubsystemChecked<UMassTrafficSubsystem>();
 
 			const TConstArrayView<FMassSimulationVariableTickFragment> VariableTickFragments = Context.GetFragmentView<FMassSimulationVariableTickFragment>();
 			const TConstArrayView<FMassTrafficRandomFractionFragment> RandomFractionFragments = Context.GetFragmentView<FMassTrafficRandomFractionFragment>();
@@ -255,6 +257,7 @@ void UMassTrafficVehicleControlProcessor::Execute(FMassEntityManager& EntityMana
 
 				PIDVehicleControl(
 					EntityManager,
+					MassTrafficSubsystem,
 					Context,
 					Index,
 					*ZoneGraphStorage,
@@ -298,10 +301,23 @@ void UMassTrafficVehicleControlProcessor::SimpleVehicleControl(
 	// Noise based lateral offset
 	LaneOffsetFragment.LateralOffset = NoiseValue * MassTrafficSettings->LateralOffsetMax;
 
+	// Offset steering in case of emergency
+	const float RescueLaneEvadeNoiseValue = MassTrafficSettings->RescueLaneNoiseScale * UE::MassTraffic::CalculateNoiseValue(VehicleControlFragment.NoiseInput, MassTrafficSettings->NoisePeriod);
+	const float RescueLaneEvadeOffset = VehicleControlFragment.EmergencyOffset * MassTrafficSettings->RescueLaneMaxEvasion * (1.0f +  RescueLaneEvadeNoiseValue);
+	LaneOffsetFragment.LateralOffset += RescueLaneEvadeOffset; 
+
+	float LaneSpeedLimit = VehicleControlFragment.CurrentLaneConstData.SpeedLimit;
+	float AverageNextLanesSpeedLimit = VehicleControlFragment.CurrentLaneConstData.AverageNextLanesSpeedLimit;
+	if (VehicleControlFragment.EmergencyOffset != 0)
+	{
+		LaneSpeedLimit *= MassTrafficSettings->RescueLaneEMSpeedMultiplier;
+		AverageNextLanesSpeedLimit *= MassTrafficSettings->RescueLaneEMSpeedMultiplier;
+	}
+
 	// Calculate varied speed limit along lane
 	const float SpeedLimit = UE::MassTraffic::GetSpeedLimitAlongLane(LaneLocationFragment.LaneLength,
-	                                                                 VehicleControlFragment.CurrentLaneConstData.SpeedLimit,
-	                                                                 VehicleControlFragment.CurrentLaneConstData.AverageNextLanesSpeedLimit,
+	                                                                 LaneSpeedLimit,
+	                                                                 AverageNextLanesSpeedLimit,
 	                                                                 LaneLocationFragment.DistanceAlongLane, VehicleControlFragment.Speed, MassTrafficSettings->SpeedLimitBlendTime
 	);
 	const float VariedSpeedLimit = UE::MassTraffic::VarySpeedLimit(SpeedLimit, MassTrafficSettings->SpeedLimitVariancePct, MassTrafficSettings->SpeedVariancePct, RandomFractionFragment.RandomFraction, NoiseValue);
@@ -551,6 +567,7 @@ void UMassTrafficVehicleControlProcessor::SimpleVehicleControl(
 
 void UMassTrafficVehicleControlProcessor::PIDVehicleControl(
 	const FMassEntityManager& EntityManager,
+	const UMassTrafficSubsystem& MassTrafficSubsystem,
 	const FMassExecutionContext& Context,
 	const int32 EntityIndex,
 	const FZoneGraphStorage& ZoneGraphStorage,
@@ -610,6 +627,11 @@ void UMassTrafficVehicleControlProcessor::PIDVehicleControl(
 	const float SteeringControlChaseTargetLateralOffset = MassTrafficSettings->LateralOffsetMax * SteeringControlChaseTargetNoiseValue;
 	SteeringControlChaseTargetLocation += SteeringControlChaseTargetOrientation.GetRightVector() * SteeringControlChaseTargetLateralOffset;
 
+	// Offset steering in case of emergency
+	const float RescueLaneEvadeNoiseValue = MassTrafficSettings->RescueLaneNoiseScale * UE::MassTraffic::CalculateNoiseValue(VehicleControlFragment.NoiseInput, MassTrafficSettings->NoisePeriod);
+	const float RescueLaneEvadeOffset = VehicleControlFragment.EmergencyOffset * MassTrafficSettings->RescueLaneMaxEvasion * (1.0f +  RescueLaneEvadeNoiseValue);
+	SteeringControlChaseTargetLocation += SteeringControlChaseTargetOrientation.GetRightVector() * RescueLaneEvadeOffset;
+
 	// When lane changing, apply lateral offsets to smoothly transition into the target lane
 	if (LaneChangeFragment && LaneChangeFragment->IsLaneChangeInProgress())
 	{
@@ -623,11 +645,23 @@ void UMassTrafficVehicleControlProcessor::PIDVehicleControl(
 	}
 
 	// Calculate varied speed limit along lane
-	const float SpeedLimit = UE::MassTraffic::GetSpeedLimitAlongLane(LaneLocationFragment.LaneLength,
-		VehicleControlFragment.CurrentLaneConstData.SpeedLimit,
-		VehicleControlFragment.CurrentLaneConstData.AverageNextLanesSpeedLimit,
+	float LaneSpeedLimit = VehicleControlFragment.CurrentLaneConstData.SpeedLimit;
+	float AverageNextLanesSpeedLimit = VehicleControlFragment.CurrentLaneConstData.AverageNextLanesSpeedLimit;
+	if (VehicleControlFragment.EmergencyOffset != 0)
+	{
+		LaneSpeedLimit *= MassTrafficSettings->RescueLaneEMSpeedMultiplier;
+		AverageNextLanesSpeedLimit *= MassTrafficSettings->RescueLaneEMSpeedMultiplier;
+	}
+
+	float SpeedLimit = UE::MassTraffic::GetSpeedLimitAlongLane(LaneLocationFragment.LaneLength,
+		LaneSpeedLimit,
+		AverageNextLanesSpeedLimit,
 		LaneLocationFragment.DistanceAlongLane, VehicleControlFragment.Speed, MassTrafficSettings->SpeedLimitBlendTime
 	);
+	if (VehicleControlFragment.EmergencyOffset != 0)
+	{
+		SpeedLimit = FMath::Min(SpeedLimit, Chaos::MPHToCmS(MassTrafficSettings->RescueLaneMaxSpeedMph));
+	}
 	const float VariedSpeedLimit = UE::MassTraffic::VarySpeedLimit(SpeedLimit, MassTrafficSettings->SpeedLimitVariancePct, MassTrafficSettings->SpeedVariancePct, RandomFractionFragment.RandomFraction, NoiseValue);
 
 	// Should stop?

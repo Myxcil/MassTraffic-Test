@@ -54,7 +54,7 @@ void UMassTrafficLightVisualizationTrait::BuildTemplate(FMassEntityTemplateBuild
 	Super::BuildTemplate(BuildContext, World);
 	
 	UMassRepresentationSubsystem* RepresentationSubsystem = Cast<UMassRepresentationSubsystem>(World.GetSubsystemBase(RepresentationSubsystemClass));
-	if (RepresentationSubsystem == nullptr)
+	if (RepresentationSubsystem == nullptr && !BuildContext.IsInspectingData())
 	{
 		UE_LOG(LogMassTraffic, Error, TEXT("UMassTrafficLightVisualizationTrait - Expecting a valid class for the representation subsystem"));
 		RepresentationSubsystem = UWorld::GetSubsystem<UMassRepresentationSubsystem>(&World);
@@ -68,7 +68,7 @@ void UMassTrafficLightVisualizationTrait::BuildTemplate(FMassEntityTemplateBuild
 
 	// Make a mutable copy of Config so we can register the driver meshes and assign the description IDs
 	FMassTrafficLightsParameters RegisteredTrafficLightsParams = TrafficLightsParams;
-	if (IsValid(RegisteredTrafficLightsParams.TrafficLightTypesData))
+	if (IsValid(RegisteredTrafficLightsParams.TrafficLightTypesData) && !BuildContext.IsInspectingData())
 	{
 		for (const FMassTrafficLightTypeData& TrafficLightType : RegisteredTrafficLightsParams.TrafficLightTypesData->TrafficLightTypes)
 		{
@@ -84,3 +84,18 @@ void UMassTrafficLightVisualizationTrait::BuildTemplate(FMassEntityTemplateBuild
 
 	BuildContext.AddFragment<FMassActorFragment>();
 }
+
+void UMassTrafficLightVisualizationTrait::SanitizeParams(FMassRepresentationParameters& InOutParams, const bool bStaticMeshDeterminedInvalid) const
+{
+	// not calling super implementation on purpose since it's modifying some of the parameters this trait class is using
+	// a bit differently that intended (the static mesh setup).
+	return;
+}
+
+#if WITH_EDITOR
+bool UMassTrafficLightVisualizationTrait::ValidateParams() const
+{
+	// not calling super implementation on purpose, since it's checking some things that this class is using in an unorthodox way (the static mesh setup)
+	return true;
+}
+#endif

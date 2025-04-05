@@ -11,24 +11,10 @@
 #include "MassTrafficVehicleSimulationTrait.generated.h"
 
 USTRUCT()
-struct MASSTRAFFIC_API FMassTrafficVehicleSimulationParameters : public FMassSharedFragment
+struct MASSTRAFFIC_API FMassTrafficVehicleSimulationParameters : public FMassConstSharedFragment
 {
 	GENERATED_BODY()
 	
-	/**
-	 * Distance from vehicle origin to front most point or rear most point (whichever is greater). Used for vehicle
-	 * avoidance collision detection.
-	 */  
-	UPROPERTY(EditAnywhere, Category = "Dimensions")
-	float HalfLength = 0.0f;
-	
-	/**
-	* Distance from vehicle origin to left most point or right most point (whichever is greater). Used for vehicle
-	* avoidance collision detection.
-	*/  
-	UPROPERTY(EditAnywhere, Category = "Dimensions")
-	float HalfWidth = 0.0f;
-
 	/** Distance along X from vehicle origin to front axel (i.e front half of wheelbase) */
 	UPROPERTY(EditAnywhere, Category = "Dimensions")
 	float FrontAxleX = 150;

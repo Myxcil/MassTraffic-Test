@@ -24,4 +24,9 @@ public:
 public:
 
 	virtual void BuildTemplate(FMassEntityTemplateBuildContext& BuildContext, const UWorld& World) const override;
+	virtual void SanitizeParams(FMassRepresentationParameters& InOutParams, const bool bStaticMeshDeterminedInvalid = false) const override;
+
+#if WITH_EDITOR
+	virtual bool ValidateParams() const override;
+#endif // WITH_EDITOR
 };

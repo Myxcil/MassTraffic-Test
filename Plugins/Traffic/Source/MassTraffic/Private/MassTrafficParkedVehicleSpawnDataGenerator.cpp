@@ -2,9 +2,9 @@
 
 #include "MassTrafficParkedVehicleSpawnDataGenerator.h"
 
-#include "MassEntityConfigAsset.h"
+#include "EngineUtils.h"
 #include "MassTrafficInitParkedVehiclesProcessor.h"
-#include "MassTrafficParkedVehicles.h"
+#include "MassTrafficParkingSpotActor.h"
 #include "MassTrafficSubsystem.h"
 #include "Algo/Accumulate.h"
 
@@ -21,16 +21,6 @@ void UMassTrafficParkedVehicleSpawnDataGenerator::Generate(
 	UWorld* World = GetWorld();
 	UMassTrafficSubsystem* MassTrafficSubsystem = UWorld::GetSubsystem<UMassTrafficSubsystem>(World);
 	check(MassTrafficSubsystem);
-
-	if (!IsValid(ParkingSpaces) || ParkingSpaces->NumParkingSpaces == 0)
-	{
-		UE_LOG(LogMassTraffic, Error, TEXT("No ParkingSpaces asset set on %s or asset is empty. No parked vehicles will be spawned."), *GetName());
-		
-		TArray<FMassEntitySpawnDataGeneratorResult> EmptyResults;
-		FinishedGeneratingSpawnPointsDelegate.Execute(EmptyResults);
-		
-		return;
-	}
 
 	// Invert EntityTypeToParkingSpaceType to find entities per parking space type 
 	TMap<FName, TArray<FMassSpawnedEntityType>> ParkingSpaceTypeToEntityTypes;
@@ -71,17 +61,28 @@ void UMassTrafficParkedVehicleSpawnDataGenerator::Generate(
 		}
 		check(ProportionSum > 0.0f);
 	}
-
+	
+	TMap<FName, TArray<FTransform>> ParkingSpotsMap;
+	for(TActorIterator<AMassTrafficParkingSpotActor> It(World); It; ++It)
+	{
+		FName ParkingSpaceType = It->GetParkingSpaceType();
+		if (!ParkingSpaceType.IsValid())
+		{
+			ParkingSpaceType = DefaultParkingSpaceType;
+		}
+		ParkingSpotsMap.FindOrAdd(ParkingSpaceType).Add(It->GetTransform());
+	}
+	
 	// Track available parking spaces
 	int32 NumAvailableParkingSpaces = 0;
 	TMap<FName, TConstArrayView<FTransform>> AvailableParkingSpaces;
-	for (const FMassTrafficTypedParkingSpaces& TypedParkingSpaces : ParkingSpaces->TypedParkingSpaces)
+	for (const auto& It : ParkingSpotsMap)
 	{
 		// Filter for only parking spaces were interested in
-		if (ParkingSpaceTypeToEntityTypes.Contains(TypedParkingSpaces.Name))
+		if (ParkingSpaceTypeToEntityTypes.Contains(It.Key))
 		{
-			AvailableParkingSpaces.Add(TypedParkingSpaces.Name, MakeArrayView(TypedParkingSpaces.ParkingSpaces));
-			NumAvailableParkingSpaces += TypedParkingSpaces.ParkingSpaces.Num();
+			AvailableParkingSpaces.Add(It.Key, MakeArrayView(It.Value));
+			NumAvailableParkingSpaces += It.Value.Num();
 		}
 	}
 
@@ -135,7 +136,7 @@ void UMassTrafficParkedVehicleSpawnDataGenerator::Generate(
 		{
 			for (const FMassSpawnedEntityType& SpawnedEntityType : ParkingSpaceTypeToEntityTypesIt.Value)
 			{
-				UE_LOG(LogMassTraffic, Warning, TEXT("Space type %s not found in ParkingSpaces asset %s for %s. No parked vehicles of this type will be spawned."), *ParkingSpaceTypeToEntityTypesIt.Key.ToString(), *ParkingSpaces->GetPathName(), *SpawnedEntityType.EntityConfig.GetAssetName());
+				UE_LOG(LogMassTraffic, Warning, TEXT("Space type %s not found in ParkingSpaces for %s. No parked vehicles of this type will be spawned."), *ParkingSpaceTypeToEntityTypesIt.Key.ToString(), *SpawnedEntityType.EntityConfig.GetAssetName());
 			}
 			continue;
 		}

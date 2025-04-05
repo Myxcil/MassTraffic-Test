@@ -171,6 +171,9 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category="Speed|Stopping")
 	FVector2D MinimumDistanceToNextVehicleRange = { 80.0f, 500.0f };
 
+	UPROPERTY(EditAnywhere, Config, Category="Speed|Stopping")
+	float NextVehicleAvoidanceBrakingPower = 3.0f;
+	
 	/**
 	 * When approaching a static impedance like a traffic light, the target speed passed to 
 	 * ThrottleAndBrakeController will be forced down to 0 at Lerp(StoppingDistance.X, StoppingDistance.Y, RandomFraction) from the light, 
@@ -179,6 +182,9 @@ public:
 	 */
 	UPROPERTY(EditAnywhere, Config, Category="Speed|Stopping")
 	FVector2D StoppingDistanceRange = { 50.0f, 350.0f };
+
+	UPROPERTY(EditAnywhere, Config, Category="Speed|Stopping")
+	float StopSignBrakingPower = 0.5f;
 
 	/**
 	 * When approaching a static impedance like a traffic light, the target speed passed to 
@@ -319,6 +325,13 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category="Obstacle Avoidance")
 	FVector2D MinimumDistanceToObstacleRange = { 80.0f, 300.0f };
 
+	UPROPERTY(EditAnywhere, Config, Category="Obstacle Avoidance")
+	float ObstacleAvoidanceBrakingPower = 0.5f;
+
+	/** Update intersections anyway even if there are no AI vehicles */
+	UPROPERTY(EditAnywhere, Config, Category="Intersections")
+	bool AlwaysUpdateIntersections = true;
+	
 	/** How long a yellow light lasts. */
 	UPROPERTY(EditAnywhere, Config, Category="Intersections|Durations|Standard")
 	float StandardTrafficPrepareToStopSeconds = 2.0f;
@@ -398,9 +411,13 @@ public:
 	UPROPERTY(EditAnywhere, Category="Lane Changing")
 	float LaneChangeMaxSideAccessoryLength = 10.0f;
 
+	// Should we randomly select a next lane
+	UPROPERTY(EditAnywhere, Category="Lane Changing")
+	int32 LaneChangeNextLaneRandom = 1;
+
 	/** Evading distance when EM vehicle approaches */
 	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
-	float RescueLaneEvasion = 100.0f;
+	float RescueLaneMaxEvasion = 100.0f;
 
 	/** How much variation in evasion */
 	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
@@ -408,8 +425,20 @@ public:
 
 	/** max speed when forming rescue lane */
 	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
-	float RescueLaneMaxSpeedMPH = 20.0f;
+	float RescueLaneMaxSpeedMph = 20.0f;
 
+	/** max speed for EM vehicles when in emergency mode */
+	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
+	float RescueLaneEMSpeedMultiplier = 1.3f;
+
+	/** max speed for EM vehicles when in emergency mode */
+	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
+	float RescueLaneDistanceToIntersectionForPriority = 1000.0f;
+
+	/** distance to which entities react to EM vehicles */
+	UPROPERTY(EditAnywhere, Config, Category="Rescue Lane")
+	float RescueLaneEMRecognitionDistance = 50000.0f;
+	
 	// @todo Rename Density Management to Overseer
 	
 	/**
