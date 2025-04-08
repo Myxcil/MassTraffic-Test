@@ -2,7 +2,9 @@
 
 ![Overview](/docs/overview.jpg)
 
+### Important
 (modified) Traffic Plugin extracted from CitySample
+We use this plugin in a project, so I'll try to share as much of 'our' code as possible as some sort of 'giving back to the community'. I hope someone finds it helpful.
 
 Thanks to:
 https://www.youtube.com/watch?v=RRWr_Hnn5Bg
