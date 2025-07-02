@@ -29,6 +29,20 @@ https://www.youtube.com/watch?v=otdm3KhM6vs
    2. Mass Traffic Vehicle Lights Fragment
    3. Mass Traffic Debug Fragment
 
+## Traits
+    MassLODCollectorTrait
+    MassTrafficVehicleVisualizationTrait
+    MassTrafficVehicleSimulationTrait
+    MassTrafficVehicleDimensionsTrait
+    MassTrafficVehicleVolumeTrait
+    MassAssortedFragmentsTrait
+
+## Fragments
+    FTransformFragment
+    FMassVelocityFragment
+    FMassForceFragment
+
+
 ![Blueprint Car Actor](/docs/bp_car_actor.jpg)
 
 
