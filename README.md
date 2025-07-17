@@ -1,10 +1,14 @@
-# TrafficTest - (modified) Mass Traffic Plugin for UE 5.5
+# TrafficTest - (modified) Mass Traffic Plugin for UE 5.6
 
 ![Overview](/docs/overview.jpg)
 
 ### Important
 (modified) Traffic Plugin extracted from CitySample
 We use this plugin in a project, so I'll try to share as much of 'our' code as possible as some sort of 'giving back to the community'. I hope someone finds it helpful.
+
+Re 5.6 update:
+I just did the bare minimum and "fixed" the compiler errors and warnings and some runtime asserts (FMassEntityQuery changed quite a bit).
+I don't claim this to be perfect but "it works". Will revist the upgrade after Epic released the 5.6 City Sample so I can see my errors of my ways.
 
 Thanks to:
 https://www.youtube.com/watch?v=RRWr_Hnn5Bg
