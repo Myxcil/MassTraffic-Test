@@ -43,7 +43,7 @@ protected:
 };
 
 UCLASS(BlueprintType, EditInlineNew, CollapseCategories, meta = (DisplayName = "Vehicle Orientation Sync"))
-class MASSTRAFFIC_API UMassTrafficVehicleOrientationSyncTrait : public UMassAgentSyncTrait
+class MASSTRAFFIC_API UMassTrafficVehicleOrientationSyncTrait : public UMassTrafficVehicleSyncTrait
 {
 	GENERATED_BODY()
 
@@ -63,7 +63,7 @@ public:
 	UMassTrafficVehicleMovementToMassTranslator();
 
 protected:
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	FMassEntityQuery EntityQuery;
@@ -79,7 +79,7 @@ public:
 	UMassTrafficVehicleOrientationToMassTranslator();
 	
 protected:
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	FMassEntityQuery EntityQuery;

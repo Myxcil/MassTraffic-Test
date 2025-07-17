@@ -76,6 +76,7 @@ public class MassTraffic : ModuleRules
 				"PhysicsCore",
 				"Chaos",
 				"ChaosCore", 
+				"EnhancedInput",
 			}
 			);
 		

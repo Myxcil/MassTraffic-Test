@@ -14,7 +14,7 @@
 #include "MassCommonFragments.h"
 #include "MassLODUtils.h"
 #include "ZoneGraphSubsystem.h"
-#include "MassGameplayExternalTraits.h"
+#include "MassExternalSubsystemTraits.h"
 
 
 #define MAX_COUNTED_CROWD_WAIT_AREA_ARRAY 50
@@ -456,7 +456,7 @@ UMassTrafficUpdateIntersectionsProcessor::UMassTrafficUpdateIntersectionsProcess
 	ExecutionOrder.ExecuteInGroup = UE::MassTraffic::ProcessorGroupNames::EndPhysicsIntersectionBehavior;
 }
 
-void UMassTrafficUpdateIntersectionsProcessor::ConfigureQueries()
+void UMassTrafficUpdateIntersectionsProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	EntityQuery.AddRequirement<FMassTrafficIntersectionFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddSubsystemRequirement<UZoneGraphSubsystem>(EMassFragmentAccess::ReadOnly);
@@ -485,7 +485,7 @@ void UMassTrafficUpdateIntersectionsProcessor::Execute(FMassEntityManager& Entit
 	const UWorld* World = GetWorld();
 
 	// Process chunks -
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [&, World](FMassExecutionContext& QueryContext)
+	EntityQuery.ForEachEntityChunk( Context, [&, World](FMassExecutionContext& QueryContext)
 	{
 		UMassCrowdSubsystem& MassCrowdSubsystem = QueryContext.GetMutableSubsystemChecked<UMassCrowdSubsystem>();
 		const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();

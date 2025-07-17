@@ -29,8 +29,8 @@ public:
 	UMassTrafficVehicleVisualizationLODProcessor();
 
 protected:
-	virtual void Initialize(UObject& InOwner) override;
-	virtual void ConfigureQueries() override;
+	virtual void InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 #if WITH_MASSTRAFFIC_DEBUG
@@ -48,5 +48,5 @@ public:
 
 protected:
 
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 };

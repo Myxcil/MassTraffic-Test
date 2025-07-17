@@ -149,7 +149,7 @@ void UMassTrafficIntersectionComponent::RefreshLanes()
 	// initialize sides here
 	switch (IntersectionType)
 	{
-	case EIntersectionType::PriorityRoad:
+	case ETrafficIntersectionType::PriorityRoad:
 		for(int32 I=0; I < IntersectionSides.Num(); ++I)
 		{
 			const bool bOpen = IntersectionSides[I].bHasPriority;
@@ -157,7 +157,7 @@ void UMassTrafficIntersectionComponent::RefreshLanes()
 		}
 		break;
 		
-	case EIntersectionType::PriorityRight:
+	case ETrafficIntersectionType::PriorityRight:
 		for(int32 I=0; I < IntersectionSides.Num(); ++I)
 		{
 			IntersectionSides[I].bHasPriority = false;
@@ -165,7 +165,7 @@ void UMassTrafficIntersectionComponent::RefreshLanes()
 		}
 		break;
 
-	case EIntersectionType::TrafficLights:
+	case ETrafficIntersectionType::TrafficLights:
 		for(int32 I=0; I < IntersectionSides.Num(); ++I)
 		{
 			IntersectionSides[I].bHasPriority = false;
@@ -229,20 +229,20 @@ void UMassTrafficIntersectionComponent::TickComponent(float DeltaTime, ELevelTic
 
 	switch (IntersectionType)
 	{
-	case EIntersectionType::PriorityRoad:
+	case ETrafficIntersectionType::PriorityRoad:
 		HandlePriorityRoad(DeltaTime);
 		break;
 		
-	case EIntersectionType::PriorityRight:
+	case ETrafficIntersectionType::PriorityRight:
 		HandlePriorityRight(DeltaTime);
 		break;
 
-	case EIntersectionType::TrafficLights:
+	case ETrafficIntersectionType::TrafficLights:
 		HandleTrafficLights(DeltaTime);
 		break;
 	}
 
-	if (IntersectionType != EIntersectionType::TrafficLights)
+	if (IntersectionType != ETrafficIntersectionType::TrafficLights)
 	{
 		ApplyLaneStatus();
 	}

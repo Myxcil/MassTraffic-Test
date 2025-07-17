@@ -162,9 +162,9 @@ UMassTrafficVehicleVisualizationProcessor::UMassTrafficVehicleVisualizationProce
 	ExecutionOrder.ExecuteAfter.Add(UMassTrafficDamageRepairProcessor::StaticClass()->GetFName());
 }
 
-void UMassTrafficVehicleVisualizationProcessor::ConfigureQueries()
+void UMassTrafficVehicleVisualizationProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
-	Super::ConfigureQueries();
+	Super::ConfigureQueries(EntityManager);
 
 	EntityQuery.AddTagRequirement<FMassTrafficVehicleTag>(EMassFragmentPresence::All);
 }
@@ -188,15 +188,15 @@ UMassTrafficVehicleUpdateCustomVisualizationProcessor::UMassTrafficVehicleUpdate
 	ExecutionOrder.ExecuteAfter.Add(UMassTrafficVehicleVisualizationProcessor::StaticClass()->GetFName());
 }
 
-void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Initialize(UObject& Owner)
+void UMassTrafficVehicleUpdateCustomVisualizationProcessor::InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager)
 {
-	Super::Initialize(Owner);
+	Super::InitializeInternal(Owner, EntityManager);
 #if WITH_MASSTRAFFIC_DEBUG
 	LogOwner = UWorld::GetSubsystem<UMassTrafficSubsystem>(Owner.GetWorld());
 #endif // WITH_MASSTRAFFIC_DEBUG
 }
 
-void UMassTrafficVehicleUpdateCustomVisualizationProcessor::ConfigureQueries()
+void UMassTrafficVehicleUpdateCustomVisualizationProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	EntityQuery.AddTagRequirement<FMassTrafficVehicleTag>(EMassFragmentPresence::All);
 	
@@ -221,7 +221,7 @@ void UMassTrafficVehicleUpdateCustomVisualizationProcessor::ConfigureQueries()
 
 void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [this](FMassExecutionContext& Context)
+	EntityQuery.ForEachEntityChunk( Context, [this](FMassExecutionContext& Context)
 	{
 		// Get mutable ISMInfos to append instances & custom data to
 		UMassRepresentationSubsystem* RepresentationSubsystem = Context.GetMutableSharedFragment<FMassRepresentationSubsystemSharedFragment>().RepresentationSubsystem;
@@ -364,7 +364,7 @@ void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 		UWorld* World = EntityManager.GetWorld();
 		const UObject* LogOwnerPtr = LogOwner.Get();
 
-		DebugEntityQuery.ForEachEntityChunk(EntityManager, Context, [World, LogOwnerPtr](FMassExecutionContext& Context)
+		DebugEntityQuery.ForEachEntityChunk( Context, [World, LogOwnerPtr](FMassExecutionContext& Context)
 			{
 				const int32 NumEntities = Context.GetNumEntities();
 				const TConstArrayView<FTransformFragment> TransformList = Context.GetFragmentView<FTransformFragment>();

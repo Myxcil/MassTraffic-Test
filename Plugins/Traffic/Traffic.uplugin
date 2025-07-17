@@ -52,5 +52,9 @@
 			"Name": "AnimToTexture",
 			"Enabled": true
 		},
+		{
+			"Name": "EnhancedInput",
+			"Enabled": true
+		}
 	]
 }

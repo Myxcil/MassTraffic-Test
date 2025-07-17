@@ -9,6 +9,11 @@
 #include "MassTrafficWheeledVehicle.generated.h"
 
 
+class UChaosWheeledVehicleMovementComponent;
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FToggleMotorDelegate, bool, NewMotorState);
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 UCLASS()
 class MASSTRAFFIC_API AMassTrafficWheeledVehicle : public AWheeledVehiclePawn,
@@ -36,6 +41,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ApplyWheelMotionBlurParameters(const TArray<UMaterialInstanceDynamic*> MotionBlurMIDs);
 
+	UFUNCTION(BlueprintPure)
+	virtual bool IsMotorRunning() const { return true; }
+	
 protected:
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wheel Motion Blur")
@@ -44,11 +52,35 @@ protected:
 	float BlurAngleMax = 0.035f;
 
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VehicleSound")
+	USoundBase* EngineSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VehicleSound")
+	USoundBase* EngineStartSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VehicleSound")
+	USoundBase* EngineStopSound;
+	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
+
+	FToggleMotorDelegate OnToggleMotor;
+	TWeakObjectPtr<UChaosWheeledVehicleMovementComponent> ChaosMovementComponent;
 
 private:
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	UPROPERTY(Transient)
 	TArray<UMaterialInstanceDynamic*> CachedMotionBlurWheelMIDs;
 	TArray<float> CachedMotionBlurWheelAngle;
+
+	bool SoundEnabled = false;	
+
+	TWeakObjectPtr<UAudioComponent> AudioEngine;
+
+	float EngineStartDelay = 2.548f;
+	float EngineLoopDelay = 1.807f;
+
+	void HandleVehicleSound();
+	void PlayEngineSound();
+	UFUNCTION()
+	void ToggleEngineSound(bool MotorState);
 };

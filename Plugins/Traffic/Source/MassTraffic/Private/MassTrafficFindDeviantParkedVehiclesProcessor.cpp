@@ -22,7 +22,7 @@ UMassTrafficFindDeviantParkedVehiclesProcessor::UMassTrafficFindDeviantParkedVeh
 	ExecutionOrder.ExecuteInGroup = UE::MassTraffic::ProcessorGroupNames::ParkedVehicleBehavior;
 }
 
-void UMassTrafficFindDeviantParkedVehiclesProcessor::ConfigureQueries()
+void UMassTrafficFindDeviantParkedVehiclesProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	NominalParkedVehicleEntityQuery.AddTagRequirement<FMassTrafficParkedVehicleTag>(EMassFragmentPresence::All);
 	NominalParkedVehicleEntityQuery.AddTagRequirement<FMassTrafficDisturbedVehicleTag>(EMassFragmentPresence::None);
@@ -35,7 +35,7 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::ConfigureQueries()
 void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
 	// Look for deviant vehicles
-	NominalParkedVehicleEntityQuery.ForEachEntityChunk(EntityManager, Context, [this](FMassExecutionContext& QueryContext)
+	NominalParkedVehicleEntityQuery.ForEachEntityChunk( Context, [this](FMassExecutionContext& QueryContext)
 	{
 		const FMassTrafficVehicleVolumeParameters& ObstacleParameters = QueryContext.GetConstSharedFragment<FMassTrafficVehicleVolumeParameters>();
 		const TConstArrayView<FTransformFragment> TransformFragments = QueryContext.GetFragmentView<FTransformFragment>();
@@ -65,7 +65,7 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager&
 					QueryContext.Defer().AddTag<FMassTrafficDisturbedVehicleTag>(ParkedVehicleEntity);
 
 					// Add fragments to allow both traffic and crowd systems to notice this vehicle as an obstacle. 
-					QueryContext.Defer().AddTag<FMassLookAtTargetTag>(ParkedVehicleEntity);
+					QueryContext.Defer().AddFragment<FMassLookAtTargetFragment>(ParkedVehicleEntity);
 					QueryContext.Defer().PushCommand<FMassCommandAddFragments<
 						FMassNavigationObstacleGridCellLocationFragment		// Needed to become a crowd avoidance obstacle
 						, FMassCrowdObstacleFragment						// Needed to be a zone graph dynamic obstacle

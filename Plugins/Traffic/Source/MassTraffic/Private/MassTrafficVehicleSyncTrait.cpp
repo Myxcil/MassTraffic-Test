@@ -86,7 +86,7 @@ UMassTrafficVehicleMovementToMassTranslator::UMassTrafficVehicleMovementToMassTr
 	bRequiresGameThreadExecution = true;
 }
 
-void UMassTrafficVehicleMovementToMassTranslator::ConfigureQueries()
+void UMassTrafficVehicleMovementToMassTranslator::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	AddRequiredTagsToQuery(EntityQuery);
 	EntityQuery.AddRequirement<FChaosVehicleMovementComponentWrapperFragment>(EMassFragmentAccess::ReadOnly);
@@ -96,7 +96,7 @@ void UMassTrafficVehicleMovementToMassTranslator::ConfigureQueries()
 
 void UMassTrafficVehicleMovementToMassTranslator::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [this](FMassExecutionContext& Context)
+	EntityQuery.ForEachEntityChunk( Context, [this](FMassExecutionContext& Context)
 	{
 		const TConstArrayView<FChaosVehicleMovementComponentWrapperFragment> ComponentList = Context.GetFragmentView<FChaosVehicleMovementComponentWrapperFragment>();
 		const TArrayView<FTransformFragment> LocationList = Context.GetMutableFragmentView<FTransformFragment>();
@@ -128,7 +128,7 @@ UMassTrafficVehicleOrientationToMassTranslator::UMassTrafficVehicleOrientationTo
 	bRequiresGameThreadExecution = true;
 }
 
-void UMassTrafficVehicleOrientationToMassTranslator::ConfigureQueries()
+void UMassTrafficVehicleOrientationToMassTranslator::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	AddRequiredTagsToQuery(EntityQuery);
 	EntityQuery.AddRequirement<FChaosVehicleMovementComponentWrapperFragment>(EMassFragmentAccess::ReadWrite);
@@ -137,7 +137,7 @@ void UMassTrafficVehicleOrientationToMassTranslator::ConfigureQueries()
 
 void UMassTrafficVehicleOrientationToMassTranslator::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [this](FMassExecutionContext& Context)
+	EntityQuery.ForEachEntityChunk( Context, [this](FMassExecutionContext& Context)
 	{
 		const TConstArrayView<FChaosVehicleMovementComponentWrapperFragment> ComponentList = Context.GetFragmentView<FChaosVehicleMovementComponentWrapperFragment>();
 		const TArrayView<FTransformFragment> LocationList = Context.GetMutableFragmentView<FTransformFragment>();

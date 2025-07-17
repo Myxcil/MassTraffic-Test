@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "MassTrafficWheeledVehicle.h"
 #include "MassTrafficControlledVehicle.generated.h"
 
@@ -47,6 +48,8 @@ public:
 	float GetSpeed() const;
 	virtual bool HasStopped() const;
 
+	virtual void ResetVehicle();
+
 protected:
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -57,9 +60,15 @@ protected:
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	virtual void BeginPlay() override;
 
+	void SetThrottle(const FInputActionValue& Value);
+	void SetBrake(const FInputActionValue& Value);
+	void SetSteering(const FInputActionValue& Value);
+	void HandleLook(const FInputActionValue& Value);
+
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	float AgentRadius = 100.0f;
 	float NoiseInput = 0.0f;
 	bool bIsDestroyed = false;
 	TObjectPtr<AAIController> OriginalAIControlller;
+	FTransform SpawnTransform;
 };

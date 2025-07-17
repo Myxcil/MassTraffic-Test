@@ -14,7 +14,7 @@ UMassTrafficInitIntersectionsProcessor::UMassTrafficInitIntersectionsProcessor()
 	bAutoRegisterWithProcessingPhases = false;
 }
 
-void UMassTrafficInitIntersectionsProcessor::ConfigureQueries() 
+void UMassTrafficInitIntersectionsProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) 
 {
 	EntityQuery.AddRequirement<FMassTrafficIntersectionFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
@@ -36,7 +36,7 @@ void UMassTrafficInitIntersectionsProcessor::Execute(FMassEntityManager& EntityM
 	
 	// Process chunks
 	int32 Offset = 0;
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+	EntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
 	{
 		// Get Mass crowd subsystem.
 		UMassCrowdSubsystem* MassCrowdSubsystem = QueryContext.GetMutableSubsystem<UMassCrowdSubsystem>();

@@ -19,7 +19,7 @@
 #include "MassZoneGraphNavigationFragments.h"
 #include "VisualLogger/VisualLogger.h"
 #include "ZoneGraphSubsystem.h"
-#include "MassGameplayExternalTraits.h"
+#include "MassExternalSubsystemTraits.h"
 #include "MassTrafficVehicleVolumeTrait.h"
 
 
@@ -36,7 +36,7 @@ UMassTrafficFindDeviantTrafficVehiclesProcessor::UMassTrafficFindDeviantTrafficV
 	ExecutionOrder.ExecuteAfter.Add(UMassTrafficUpdateVelocityProcessor::StaticClass()->GetFName());
 }
 
-void UMassTrafficFindDeviantTrafficVehiclesProcessor::ConfigureQueries()
+void UMassTrafficFindDeviantTrafficVehiclesProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	// High LOD physics vehicles which haven't been marked as deviant obstacles to check for deviation
 	NominalTrafficVehicleEntityQuery.AddTagRequirement<FMassTrafficObstacleTag>(EMassFragmentPresence::None);
@@ -82,7 +82,7 @@ static void RemoveDeviantFragments(const FMassEntityManager& EntityManager, cons
 	// no longer considered for obstacle avoidance.
 	const FMassEntityHandle Entity = Context.GetEntity(Index);
 	Context.Defer().RemoveTag<FMassTrafficObstacleTag>(Entity);
-	Context.Defer().RemoveTag<FMassLookAtTargetTag>(Entity);
+	Context.Defer().RemoveFragment<FMassLookAtTargetFragment>(Entity);
 
 	// Manually do the work of UMassAvoidanceObstacleRemoverFragmentDestructor because it's not called on fragment removal.
 	const FMassEntityView EntityView(EntityManager, Entity);
@@ -103,7 +103,7 @@ static void RemoveDeviantFragments(const FMassEntityManager& EntityManager, cons
 void UMassTrafficFindDeviantTrafficVehiclesProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
 	// Look for deviant vehicles
-	NominalTrafficVehicleEntityQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+	NominalTrafficVehicleEntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
 	{
 		const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
 
@@ -166,7 +166,7 @@ void UMassTrafficFindDeviantTrafficVehiclesProcessor::Execute(FMassEntityManager
 					// considered for obstacle avoidance.
 					const FMassEntityHandle Entity = QueryContext.GetEntity(Index);
 					QueryContext.Defer().AddTag<FMassTrafficObstacleTag>(Entity);
-					QueryContext.Defer().AddTag<FMassLookAtTargetTag>(Entity);
+					QueryContext.Defer().AddFragment<FMassLookAtTargetFragment>(Entity);
 
 					QueryContext.Defer().PushCommand<FMassCommandAddFragments<
 						FMassNavigationObstacleGridCellLocationFragment		// Needed to become an avoidance obstacle
@@ -186,7 +186,7 @@ void UMassTrafficFindDeviantTrafficVehiclesProcessor::Execute(FMassEntityManager
 	});
 
 	// Check known deviant vehicles to see if they're still deviant
-	DeviantTrafficVehicleEntityQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+	DeviantTrafficVehicleEntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
 	{
 		UMassNavigationSubsystem& NavigationSubsystem = QueryContext.GetMutableSubsystemChecked<UMassNavigationSubsystem>();
 		const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
@@ -257,7 +257,7 @@ void UMassTrafficFindDeviantTrafficVehiclesProcessor::Execute(FMassEntityManager
 	});
 
 	// Remove obstacle fragment from implicitly corrected vehicles
-	CorrectedTrafficVehicleEntityQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+	CorrectedTrafficVehicleEntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
 	{
 		UMassNavigationSubsystem& NavigationSubsystem = QueryContext.GetMutableSubsystemChecked<UMassNavigationSubsystem>();
 

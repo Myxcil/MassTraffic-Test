@@ -27,6 +27,7 @@ public class MassTrafficEditor : ModuleRules
 				"Engine",
 				"ZoneGraph",
 				"MassTraffic",
+				//"StructUtils"
 			}
 			);
 			

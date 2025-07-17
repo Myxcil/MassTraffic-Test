@@ -20,7 +20,7 @@
 #include "VisualLogger/VisualLogger.h"
 #include "ZoneGraphSubsystem.h"
 #include "ZoneGraphTypes.h"
-#include "MassGameplayExternalTraits.h"
+#include "MassExternalSubsystemTraits.h"
 
 
 template<typename FormatType>
@@ -58,7 +58,7 @@ UMassTrafficVehiclePhysicsProcessor::UMassTrafficVehiclePhysicsProcessor()
 	ExecutionOrder.ExecuteAfter.Add(UMassTrafficVehicleControlProcessor::StaticClass()->GetFName());
 }
 
-void UMassTrafficVehiclePhysicsProcessor::ConfigureQueries()
+void UMassTrafficVehiclePhysicsProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	SimplePhysicsVehiclesQuery.AddTagRequirement<FMassTrafficVehicleTag>(EMassFragmentPresence::Any);
 	SimplePhysicsVehiclesQuery.AddRequirement<FMassTrafficPIDVehicleControlFragment>(EMassFragmentAccess::ReadOnly);
@@ -85,7 +85,7 @@ void UMassTrafficVehiclePhysicsProcessor::ConfigureQueries()
 		{
 			if (const Chaos::FPBDRigidsSolver* Solver = PhysScene->GetSolver())
 			{
-				ChaosConstraintSolverSettings = Solver->GetJointConstraints().GetSettings();
+				ChaosConstraintSolverSettings = Solver->GetJointCombinedConstraints().LinearConstraints.GetSettings();
 			}
 		}
 	}
@@ -113,7 +113,7 @@ void UMassTrafficVehiclePhysicsProcessor::Execute(FMassEntityManager& EntityMana
 		// Get gravity from world
 		float GravityZ = GetWorld()->GetGravityZ();
 		
-		SimplePhysicsVehiclesQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+		SimplePhysicsVehiclesQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
 		{
 			const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
 

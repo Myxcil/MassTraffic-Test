@@ -15,7 +15,7 @@
 #include "MassZoneGraphNavigationFragments.h"
 #include "ZoneGraphSubsystem.h"
 #include "ZoneGraphTypes.h"
-#include "MassGameplayExternalTraits.h"
+#include "MassExternalSubsystemTraits.h"
 
 #define DEBUG_LANE_CHANGE_LEVEL 0
 
@@ -600,7 +600,7 @@ UMassTrafficLaneChangingProcessor::UMassTrafficLaneChangingProcessor()
 	ExecutionOrder.ExecuteAfter.Add(UMassTrafficOverseerProcessor::StaticClass()->GetFName());
 }
 
-void UMassTrafficLaneChangingProcessor::ConfigureQueries() 
+void UMassTrafficLaneChangingProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) 
 {
 	StartNewLaneChangesEntityQuery_Conditional.AddTagRequirement<FMassTrafficParkedVehicleTag>(EMassFragmentPresence::None);
 	StartNewLaneChangesEntityQuery_Conditional.AddRequirement<FAgentRadiusFragment>(EMassFragmentAccess::ReadOnly);
@@ -651,7 +651,7 @@ void UMassTrafficLaneChangingProcessor::Execute(FMassEntityManager& EntityManage
 	{
 		TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("StartNewLaneChanges"));
 
-		StartNewLaneChangesEntityQuery_Conditional.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+		StartNewLaneChangesEntityQuery_Conditional.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
 			{
 				const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
 				UMassTrafficSubsystem& MassTrafficSubsystem = QueryContext.GetMutableSubsystemChecked<UMassTrafficSubsystem>();
@@ -712,8 +712,7 @@ void UMassTrafficLaneChangingProcessor::Execute(FMassEntityManager& EntityManage
 	{
 		TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("UpdateLaneChanges"));
 		
-		UpdateLaneChangesEntityQuery_Conditional.ForEachEntityChunk(
-				EntityManager, Context, [&](FMassExecutionContext& ComponentSystemExecutionContext)
+		UpdateLaneChangesEntityQuery_Conditional.ForEachEntityChunk(Context, [&](FMassExecutionContext& ComponentSystemExecutionContext)
 			{
 				// NOTE - Don't check if we should skip this due to LOD. All lane changes, once started, should always be
 				// updated until finished. 

@@ -4,14 +4,14 @@
 #include "MassCommonUtils.h"
 #include "ZoneGraphSubsystem.h" 
 
-void UMassTrafficProcessorBase::Initialize(UObject& InOwner)
+void UMassTrafficProcessorBase::InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager)
 {
-	Super::Initialize(InOwner);
+	Super::InitializeInternal(Owner, EntityManager);
 
 	// Get settings
 	MassTrafficSettings = GetDefault<UMassTrafficSettings>();
 
-	LogOwner = UWorld::GetSubsystem<UMassTrafficSubsystem>(InOwner.GetWorld());
+	LogOwner = UWorld::GetSubsystem<UMassTrafficSubsystem>(Owner.GetWorld());
 
 	// Seed random stream
 	const int32 TrafficRandomSeed = UE::Mass::Utils::OverrideRandomSeedForTesting(MassTrafficSettings->RandomSeed);

@@ -131,4 +131,11 @@ FORCEINLINE float GetSpeedLimitAlongLane(const float Length, const float SpeedLi
 	return FMath::Lerp(SpeedLimit, MinNextLaneSpeedLimit, SpeedScale) IF_MASSTRAFFIC_ENABLE_DEBUG( * GMassTrafficSpeedLimitScale );
 }
 
+FORCEINLINE float GetSpeedLimitAlongLaneExtern(const float Length, const float SpeedLimit, const float MinNextLaneSpeedLimit, const float DistanceAlongLane, const float CurrentSpeed, const float TimeToBlendFromLaneEnd = 2.0f)
+{
+	const float TimeLeftOnLane = (Length - DistanceAlongLane) / CurrentSpeed; 
+	const float SpeedScale = 1.0f - FMath::Clamp(TimeLeftOnLane / TimeToBlendFromLaneEnd, 0.0f, 1.0f);
+	return FMath::Lerp(SpeedLimit, MinNextLaneSpeedLimit, SpeedScale);
+}
+
 }

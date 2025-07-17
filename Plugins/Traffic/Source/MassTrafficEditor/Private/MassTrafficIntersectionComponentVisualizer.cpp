@@ -39,7 +39,7 @@ void FMassTrafficIntersectionComponentVisualizer::DrawVisualization(const UActor
 
 	DrawCircle(PDI, IntersectionComponent->GetOwner()->GetActorLocation(), FVector::XAxisVector, FVector::YAxisVector, FLinearColor::White, IntersectionComponent->GetIntersectionSize(), 32, SDPG_Foreground, 1.0f);
 
-	if (IntersectionComponent->GetIntersectionType() != EIntersectionType::TrafficLights)
+	if (IntersectionComponent->GetIntersectionType() != ETrafficIntersectionType::TrafficLights)
 	{
 		const int32 NumSides = IntersectionComponent->GetNumSides();
 		for(int32 Side=0; Side < NumSides; ++Side)

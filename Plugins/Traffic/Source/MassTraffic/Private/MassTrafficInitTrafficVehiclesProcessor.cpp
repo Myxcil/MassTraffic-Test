@@ -24,7 +24,7 @@ UMassTrafficInitTrafficVehiclesProcessor::UMassTrafficInitTrafficVehiclesProcess
 	bAutoRegisterWithProcessingPhases = false;
 }
 
-void UMassTrafficInitTrafficVehiclesProcessor::ConfigureQueries()
+void UMassTrafficInitTrafficVehiclesProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadWrite);
@@ -37,11 +37,11 @@ void UMassTrafficInitTrafficVehiclesProcessor::ConfigureQueries()
 	EntityQuery.AddSubsystemRequirement<UMassReplicationSubsystem>(EMassFragmentAccess::ReadWrite);
 }
 
-void UMassTrafficInitTrafficVehiclesProcessor::Initialize(UObject& InOwner)
+void UMassTrafficInitTrafficVehiclesProcessor::InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager)
 {
-	Super::Initialize(InOwner);
+	Super::InitializeInternal(Owner, EntityManager);
 
-	MassRepresentationSubsystem = UWorld::GetSubsystem<UMassRepresentationSubsystem>(InOwner.GetWorld());
+	MassRepresentationSubsystem = UWorld::GetSubsystem<UMassRepresentationSubsystem>(Owner.GetWorld());
 }
 
 void UMassTrafficInitTrafficVehiclesProcessor::InitNetIds(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -50,7 +50,7 @@ void UMassTrafficInitTrafficVehiclesProcessor::InitNetIds(FMassEntityManager& En
 
 	check(EntityManager.GetWorld() && EntityManager.GetWorld()->GetNetMode() != NM_Client);
 
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [](FMassExecutionContext& Context)
+	EntityQuery.ForEachEntityChunk( Context, [](FMassExecutionContext& Context)
 		{
 			UMassReplicationSubsystem& ReplicationSubsystem = Context.GetMutableSubsystemChecked<UMassReplicationSubsystem>();
 			const int32 NumEntities = Context.GetNumEntities();
@@ -79,7 +79,7 @@ void UMassTrafficInitTrafficVehiclesProcessor::Execute(FMassEntityManager& Entit
 
 	// Init dynamic vehicle data 
 	int32 VehicleIndex = 0;
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+	EntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
 	{
 		UMassTrafficSubsystem& MassTrafficSubsystem = QueryContext.GetMutableSubsystemChecked<UMassTrafficSubsystem>();
 

@@ -15,7 +15,7 @@ class MASSTRAFFIC_API UMassTrafficUpdateIntersectionsProcessor : public UMassTra
 
 protected:
 	UMassTrafficUpdateIntersectionsProcessor();
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	FMassEntityQuery EntityQuery;
