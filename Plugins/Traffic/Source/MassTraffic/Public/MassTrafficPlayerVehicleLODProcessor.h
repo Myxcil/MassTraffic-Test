@@ -4,7 +4,6 @@
 
 #include "MassProcessor.h"
 #include "MassTrafficFragments.h"
-
 #include "MassTrafficPlayerVehicleLODProcessor.generated.h"
 
 /*
@@ -20,7 +19,7 @@ public:
 	UMassTrafficPlayerVehicleLODProcessor();
 
 protected:
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	FMassEntityQuery EntityQuery;

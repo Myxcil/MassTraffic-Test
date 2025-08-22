@@ -2,15 +2,19 @@
 
 #pragma once
 
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "CoreMinimal.h"
+#include "ZoneShapeActor.h"
+#include "MassTrafficEditor.h"
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "Math/RandomStream.h"
 #include "ZoneShapeComponent.h"
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "ZoneShapeActor.h"
-
 #include "MassTrafficEditor.h"
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTrafficBuilderTypes.h"
 #include "MassTrafficEditorBaseActor.h"
-
 #include "MassTrafficBuilderBaseActor.generated.h"
 
 

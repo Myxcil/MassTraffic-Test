@@ -17,8 +17,8 @@ public:
 	UMassTrafficVehicleControlProcessor();
 
 protected:
-	virtual void ConfigureQueries() override;
-	virtual void Execute(FMassEntityManager& EntitySubSystem, FMassExecutionContext& Context) override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 	
 	void SimpleVehicleControl(
 		FMassEntityManager& EntityManager,
@@ -39,7 +39,6 @@ protected:
 
 	void PIDVehicleControl(
 		const FMassEntityManager& EntityManager,
-		const UMassTrafficSubsystem& MassTrafficSubsystem,
 		const FMassExecutionContext& Context,
 		const int32 EntityIndex,
 		const FZoneGraphStorage& ZoneGraphStorage,

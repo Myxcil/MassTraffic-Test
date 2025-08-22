@@ -16,7 +16,7 @@ struct FMassTrafficZoneGraphData;
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 UENUM(BlueprintType)
-enum class EIntersectionType : uint8
+enum class ETrafficIntersectionType : uint8
 {
 	PriorityRight,
 	PriorityRoad,
@@ -56,7 +56,7 @@ class MASSTRAFFIC_API UMassTrafficIntersectionComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, Category=Intersection, meta=(AllowPrivateAccess=true))
 	float IntersectionSize = 1000.0f;
 	UPROPERTY(EditAnywhere, Category=Intersection, meta=(AllowPrivateAccess=true))
-	EIntersectionType IntersectionType = EIntersectionType::PriorityRight;
+	ETrafficIntersectionType IntersectionType = ETrafficIntersectionType::PriorityRight;
 	UPROPERTY(EditAnywhere, Category=Intersection, meta=(AllowPrivateAccess=true, EditCondition="IntersectionType == EIntersectionType::PriorityRoad", EditConditionHides))
 	TArray<int32> PriorityRoadSides;
 	UPROPERTY(EditAnywhere, Category=Intersection, meta=(AllowPrivateAccess=true, EditCondition="IntersectionType == EIntersectionType::TrafficLights", EditConditionHides))
@@ -78,7 +78,7 @@ public:
 	void SetEmergencyLane(const FZoneGraphLaneHandle& LaneHandle, const bool bIsEmergency);
 	
 #if WITH_EDITOR
-	EIntersectionType GetIntersectionType() const { return IntersectionType; }
+	ETrafficIntersectionType GetIntersectionType() const { return IntersectionType; }
 	float GetIntersectionSize() const { return IntersectionSize; }
 	int32 GetNumSides() const { return IntersectionSides.Num(); }
 	bool IsPrioritySide(const int32 SideIndex) const { return IntersectionSides[SideIndex].bHasPriority; }

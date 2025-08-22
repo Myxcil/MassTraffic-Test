@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MassEntityTypes.h"
+#include "MassEntityHandle.h"
 #include "Components/ActorComponent.h"
 #include "MassTrafficTrackNearVehicles.generated.h"
 

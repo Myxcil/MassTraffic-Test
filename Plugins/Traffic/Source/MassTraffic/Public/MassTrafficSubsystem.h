@@ -5,12 +5,11 @@
 #include "MassTrafficPhysics.h"
 #include "MassTrafficTypes.h"
 #include "MassTrafficSettings.h"
-
 #include "ZoneGraphData.h"
 #include "ZoneGraphSubsystem.h"
 #include "MassEntityQuery.h"
-#include "Subsystems/WorldSubsystem.h"
-
+#include "MassExternalSubsystemTraits.h"
+#include "MassSubsystemBase.h"
 #include "MassTrafficSubsystem.generated.h"
 
 class UMassTrafficFieldComponent;
@@ -36,7 +35,7 @@ struct FZoneGraphLaneLocationEx : public FZoneGraphLaneLocation
  * Manages traffic specific runtime data for traffic navigable zone graph lanes. 
  */
 UCLASS(BlueprintType)
-class MASSTRAFFIC_API UMassTrafficSubsystem : public UWorldSubsystem
+class MASSTRAFFIC_API UMassTrafficSubsystem : public UMassSubsystemBase
 {
 	GENERATED_BODY()
 
@@ -222,6 +221,7 @@ struct TMassExternalSubsystemTraits<UMassTrafficSubsystem> final
 {
 	enum
 	{
-		GameThreadOnly = false
+		GameThreadOnly = false,
+		ThreadSafeWrite = false
 	};
 };

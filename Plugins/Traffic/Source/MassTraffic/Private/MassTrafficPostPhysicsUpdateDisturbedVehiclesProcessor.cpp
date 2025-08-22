@@ -19,7 +19,7 @@ UMassTrafficPostPhysicsUpdateDisturbedVehiclesProcessor::UMassTrafficPostPhysics
 	ExecutionOrder.ExecuteInGroup = UE::MassTraffic::ProcessorGroupNames::PostPhysicsUpdateTrafficVehicles;
 }
 
-void UMassTrafficPostPhysicsUpdateDisturbedVehiclesProcessor::ConfigureQueries()
+void UMassTrafficPostPhysicsUpdateDisturbedVehiclesProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	// "Disturbed" vehicles are parked vehicles that have been driven off by the player or smashed into, i.e. disturbed
 	// from their original spawn location. This means they'll have an obstacle tag and a velocity fragment from the
@@ -33,10 +33,10 @@ void UMassTrafficPostPhysicsUpdateDisturbedVehiclesProcessor::ConfigureQueries()
 
 }
 
-void UMassTrafficPostPhysicsUpdateDisturbedVehiclesProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+void UMassTrafficPostPhysicsUpdateDisturbedVehiclesProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& ExecutionContext)
 {
 	// The main point of this processor is to update Mass with the location of the actor.
-	DisturbedVehicleQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& ComponentSystemExecutionContext)
+	DisturbedVehicleQuery.ForEachEntityChunk(ExecutionContext, [&](FMassExecutionContext& Context)
 	{
 		const TConstArrayView<FMassActorFragment> ActorFragments = Context.GetFragmentView<FMassActorFragment>();
 		const TArrayView<FMassRepresentationFragment> RepresentationFragments = Context.GetMutableFragmentView<FMassRepresentationFragment>();
@@ -44,15 +44,15 @@ void UMassTrafficPostPhysicsUpdateDisturbedVehiclesProcessor::Execute(FMassEntit
 		const TArrayView<FMassTrafficVehicleDamageFragment> VehicleDamageFragments = Context.GetMutableFragmentView<FMassTrafficVehicleDamageFragment>();
 		const TArrayView<FMassVelocityFragment> VelocityFragments = Context.GetMutableFragmentView<FMassVelocityFragment>();
 
-		for (int32 Index = 0; Index < Context.GetNumEntities(); ++Index)
+		for (FMassExecutionContext::FEntityIterator EntityIt = Context.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			FMassRepresentationFragment& RepresentationFragment = RepresentationFragments[Index];
-			FTransformFragment& TransformFragment = TransformFragments[Index];
-			FMassVelocityFragment& VelocityFragment = VelocityFragments[Index];
-			FMassTrafficVehicleDamageFragment& VehicleDamageFragment = VehicleDamageFragments[Index];
+			FMassRepresentationFragment& RepresentationFragment = RepresentationFragments[EntityIt];
+			FTransformFragment& TransformFragment = TransformFragments[EntityIt];
+			FMassVelocityFragment& VelocityFragment = VelocityFragments[EntityIt];
+			FMassTrafficVehicleDamageFragment& VehicleDamageFragment = VehicleDamageFragments[EntityIt];
 
-			const AActor* Actor = ActorFragments[Index].Get();
-			if (Actor != nullptr && RepresentationFragments[Index].CurrentRepresentation == EMassRepresentationType::HighResSpawnedActor)
+			const AActor* Actor = ActorFragments[EntityIt].Get();
+			if (Actor != nullptr && RepresentationFragments[EntityIt].CurrentRepresentation == EMassRepresentationType::HighResSpawnedActor)
 			{
 				// Update transform from actor based LOD
 				TransformFragment.SetTransform(Actor->GetActorTransform());

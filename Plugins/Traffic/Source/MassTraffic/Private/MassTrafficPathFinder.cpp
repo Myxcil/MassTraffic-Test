@@ -39,31 +39,57 @@ void UMassTrafficPathFinder::BeginPlay()
 		}
 	}
 
-	FindNearestLane(GetOwner()->GetActorLocation(), 500.0f, CurrLocation);
+	FindNearestLane(GetOwner()->GetActorLocation(), LaneSearchRadius, CurrLocation);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool UMassTrafficPathFinder::FindNearestLane(const FVector& Location, const float SearchSize, FZoneGraphLaneLocation& LaneLocation) const
+bool UMassTrafficPathFinder::SearchShortestPath(const TArray<FVector>& Starts, const TArray<FVector>& Ends)
 {
-	const FBox SearchBox = FBox::BuildAABB(Location, FVector(SearchSize));
-	float Tmp;
-	return ZoneGraphSubsystem->FindNearestLane(SearchBox, ZoneGraphTagFilter, LaneLocation, Tmp);
+	CurrentPath.Reset();
+	
+	FTrafficPath TempPath;
+	float MinLength = std::numeric_limits<float>::max();
+	for(int32 StartIndex=0; StartIndex < Starts.Num(); ++StartIndex)
+	{
+		const FVector& Start = Starts[StartIndex];
+		for (int EndIndex = 0; EndIndex < Ends.Num(); ++EndIndex)
+		{
+			const FVector& End = Ends[EndIndex];
+			if (SearchPath(Start, End, TempPath))
+			{
+				const float Length = CalculatePathLength(TempPath);
+				if (Length < MinLength)
+				{
+					MinLength = Length;
+					CurrentPath = TempPath;
+				}
+			}
+		}
+	}
+	return CurrentPath.IsValid();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool UMassTrafficPathFinder::SearchPath(const FVector& End)
+bool UMassTrafficPathFinder::SearchPath(const FVector& Start, const FVector& End)
 {
-	if (!FindNearestLane(GetOwner()->GetActorLocation(),500.0f, Origin))
+	CurrentPath.Reset();
+	return SearchPath(Start, End, CurrentPath);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool UMassTrafficPathFinder::SearchPath(const FVector& Start, const FVector& End, FTrafficPath& TrafficPath)
+{
+	if (!FindNearestLane(Start, LaneSearchRadius, TrafficPath.Origin))
 		return false;
 	
-	if (!FindNearestLane(End, 500.0f, Destination))
+	if (!FindNearestLane(End, LaneSearchRadius, TrafficPath.Destination))
 		return false;
 
-	const FZoneGraphTrafficLaneData* From = GetLaneData(Origin.LaneHandle);
+	const FZoneGraphTrafficLaneData* From = GetLaneData(TrafficPath.Origin.LaneHandle);
 	if (!From)
 		return false;
 	
-	const FZoneGraphTrafficLaneData* To = GetLaneData(Destination.LaneHandle);
+	const FZoneGraphTrafficLaneData* To = GetLaneData(TrafficPath.Destination.LaneHandle);
 	if (!To)
 		return false;
 
@@ -82,13 +108,13 @@ bool UMassTrafficPathFinder::SearchPath(const FVector& End)
 		const FZoneGraphTrafficLaneData* Lane = PopCheapest();
 		if (Lane == To)
 		{
-			LanePath.Reset();
+			TrafficPath.Path.Reset();
 			while (Lane != nullptr)
 			{
-				LanePath.Add(Lane);
+				TrafficPath.Path.Add(Lane);
 				Lane = LaneNodes[Lane].Parent;
 			}
-			Algo::Reverse(LanePath);
+			Algo::Reverse(TrafficPath.Path);
 			return true;
 		}
 		LaneNodes[Lane].bIsClosed = true;
@@ -102,11 +128,12 @@ bool UMassTrafficPathFinder::SearchPath(const FVector& End)
 void UMassTrafficPathFinder::InitPathFollowing()
 {
 	LanePathIndex = 0;
-	CurrLocation = Origin;
+	CurrLocation = CurrentPath.Origin;
+	LastValidDistanceAlongLane = CurrentPath.Origin.DistanceAlongLane;
 
 	if (OnLaneChanged.IsBound())
 	{
-		OnLaneChanged.Execute(FZoneGraphLaneHandle(), Origin.LaneHandle);
+		OnLaneChanged.Execute(FZoneGraphLaneHandle(), CurrentPath.Origin.LaneHandle);
 	}
 }
 
@@ -117,10 +144,10 @@ bool UMassTrafficPathFinder::UpdatePathFollowing(const float LookAheadDistance, 
 	const FTransform& Transform = GetOwner()->GetTransform();
 	
 	const FVector Location = Transform.GetLocation();
-	FindNearestLane(Location, 500.0f, CurrLocation);
+	FindNearestLane(Location, LaneSearchRadius, CurrLocation);
 
 	// Done?
-	if (CurrLocation.LaneHandle == Destination.LaneHandle && CurrLocation.DistanceAlongLane >= Destination.DistanceAlongLane)
+	if (CurrLocation.LaneHandle == CurrentPath.Destination.LaneHandle && CurrLocation.DistanceAlongLane >= CurrentPath.Destination.DistanceAlongLane)
 	{
 		if (OnLaneChanged.IsBound())
 		{
@@ -129,31 +156,51 @@ bool UMassTrafficPathFinder::UpdatePathFollowing(const float LookAheadDistance, 
 		return false;
 	}
 
-	const FZoneGraphTrafficLaneData* CurrLane = LanePath[LanePathIndex];
-	if (CurrLocation.LaneHandle != CurrLane->LaneHandle)
+	// if calculated position doesn't match path position anymore,
+	// follow the path until we reach our current lane 
+	const FZoneGraphTrafficLaneData* CurrLane = CurrentPath.Path[LanePathIndex];
+	if (CurrLocation.LaneHandle.IsValid())
 	{
-		for(int32 I=LanePathIndex+1; I < LanePath.Num(); ++I)
+		if (CurrLocation.LaneHandle != CurrLane->LaneHandle)
 		{
-			if (LanePath[I]->LaneHandle == CurrLocation.LaneHandle)
+			for(int32 I=LanePathIndex+1; I < CurrentPath.Path.Num(); ++I)
 			{
-				LanePathIndex = I;
-				CurrLane = LanePath[LanePathIndex];
-				break;
+				if (CurrentPath.Path[I]->LaneHandle == CurrLocation.LaneHandle)
+				{
+					LanePathIndex = I;
+					CurrLane = CurrentPath.Path[LanePathIndex];
+					break;
+				}
 			}
 		}
 	}
-
-	int32 NextLaneIndex = INDEX_NONE;
-	if (LanePathIndex < LanePath.Num()-1)
+	else
 	{
-		NextLaneIndex = LanePath[LanePathIndex+1]->LaneHandle.Index;
+		const float Distance = FVector::Distance(Location, CurrentPath.Origin.Position);
+		if (Distance < LaneSearchRadius)
+		{
+			CurrLocation = CurrentPath.Origin;
+		}
 	}
 
+	// Update distance travelled only if we are still on our path
+	if (CurrLocation.LaneHandle == CurrLane->LaneHandle)
+	{
+		LastValidDistanceAlongLane = CurrLocation.DistanceAlongLane;
+	}
+
+	int32 NextLaneIndex = INDEX_NONE;
+	if (LanePathIndex < CurrentPath.Path.Num()-1)
+	{
+		NextLaneIndex = CurrentPath.Path[LanePathIndex+1]->LaneHandle.Index;
+	}
+
+	// notfiy that we changed lanes
 	if (PrevLanePathIndex != LanePathIndex)
 	{
 		if (OnLaneChanged.IsBound())
 		{
-			OnLaneChanged.Execute(LanePath[PrevLanePathIndex]->LaneHandle, LanePath[LanePathIndex]->LaneHandle);
+			OnLaneChanged.Execute(CurrentPath.Path[PrevLanePathIndex]->LaneHandle, CurrentPath.Path[LanePathIndex]->LaneHandle);
 		}
 	}
 
@@ -163,12 +210,15 @@ bool UMassTrafficPathFinder::UpdatePathFollowing(const float LookAheadDistance, 
 		CurrLane->LaneHandle.Index,
 		CurrLane->Length,
 		NextLaneIndex,
-		CurrLocation.DistanceAlongLane + LookAheadDistance,
+		LastValidDistanceAlongLane + LookAheadDistance,
 		ETrafficVehicleMovementInterpolationMethod::CubicBezier,
 		LaneSegment,
 		TargetPosition,
 		TargetOrientation);
 
+	LastTargetPosition = TargetPosition;
+	LastTargetOrientation = TargetOrientation;
+	
 	return true;
 }
 
@@ -184,15 +234,15 @@ const FZoneGraphTrafficLaneData* UMassTrafficPathFinder::GetCurrentLane() const
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 const FZoneGraphTrafficLaneData* UMassTrafficPathFinder::GetNextLane() const
 {
-	return LanePathIndex < LanePath.Num()-1 ? LanePath[LanePathIndex+1] : nullptr;
+	return LanePathIndex < CurrentPath.Path.Num()-1 ? CurrentPath.Path[LanePathIndex+1] : nullptr;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
-float UMassTrafficPathFinder::UpdateLaneLength(const FZoneGraphTrafficLaneData* CurrLane) const
+float UMassTrafficPathFinder::CalculateActualLaneLength(const FZoneGraphTrafficLaneData* CurrLane) const
 {
-	if (CurrLane->LaneHandle == Destination.LaneHandle)
+	if (CurrLane->LaneHandle == CurrentPath.Destination.LaneHandle)
 	{
-		return Destination.DistanceAlongLane + DestinationLaneOffset;
+		return CurrentPath.Destination.DistanceAlongLane + DestinationLaneOffset;
 	}
 	return CurrLane->Length;
 }
@@ -200,9 +250,9 @@ float UMassTrafficPathFinder::UpdateLaneLength(const FZoneGraphTrafficLaneData* 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 float UMassTrafficPathFinder::GetDistanceToNextLane() const
 {
-	if (CurrLocation.IsValid() && LanePath.IsValidIndex(LanePathIndex))
+	if (CurrLocation.IsValid() && CurrentPath.Path.IsValidIndex(LanePathIndex))
 	{
-		const FZoneGraphTrafficLaneData* CurrLane = LanePath[LanePathIndex];
+		const FZoneGraphTrafficLaneData* CurrLane = CurrentPath.Path[LanePathIndex];
 		return CurrLane->Length - CurrLocation.DistanceAlongLane; 		
 	}
 	return std::numeric_limits<float>().max();
@@ -218,6 +268,14 @@ void UMassTrafficPathFinder::SetEmergencyLane(const FZoneGraphLaneHandle& LaneHa
 			TrafficLaneData->bIsEmergencyLane = bIsEmergencyLane;
 		}
 	}
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool UMassTrafficPathFinder::FindNearestLane(const FVector& Location, const float SearchSize, FZoneGraphLaneLocation& LaneLocation) const
+{
+	const FBox SearchBox = FBox::BuildAABB(Location, FVector(SearchSize));
+	float Tmp;
+	return ZoneGraphSubsystem->FindNearestLane(SearchBox, ZoneGraphTagFilter, LaneLocation, Tmp);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -302,4 +360,16 @@ void UMassTrafficPathFinder::EvaluateLane(const FZoneGraphTrafficLaneData* Lane,
 			OpenList.Add(NextLane);
 		}
 	}
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+float UMassTrafficPathFinder::CalculatePathLength(const FTrafficPath& TrafficPath)
+{
+	float Length = TrafficPath.Path[0]->Length - TrafficPath.Origin.DistanceAlongLane;
+	for(int32 I=1; I < TrafficPath.Path.Num()-1; ++I)
+	{
+		Length += TrafficPath.Path[I]->Length;
+	}
+	Length += TrafficPath.Destination.DistanceAlongLane;
+	return Length;
 }

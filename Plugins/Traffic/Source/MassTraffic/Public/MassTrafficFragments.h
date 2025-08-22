@@ -2,20 +2,21 @@
 
 #pragma once
 
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTraffic.h"
+#include "MassTrafficUtils.h"
+#include "Containers/RingBuffer.h"
+#include "MassLODSubsystem.h"
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTrafficDamage.h"
 #include "MassTrafficDebugHelpers.h"
 #include "MassTrafficPIDController.h"
 #include "MassTrafficTypes.h"
-#include "MassTrafficUtils.h"
-
+#include "MassTrafficPhysics.h"
 #include "MassCrowdSubsystem.h"
 #include "MassEntityTypes.h"
 #include "ZoneGraphTypes.h"
-#include "Containers/RingBuffer.h"
-#include "MassLODSubsystem.h"
 #include "MassTrafficSettings.h"
-
 #include "MassTrafficFragments.generated.h"
 
 
@@ -78,6 +79,7 @@ struct MASSTRAFFIC_API FMassTrafficPlayerVehicleTag : public FMassTag
 {
 	GENERATED_BODY()
 };
+
 
 USTRUCT()
 struct MASSTRAFFIC_API FMassTrafficRecyclableVehicleTag : public FMassTag

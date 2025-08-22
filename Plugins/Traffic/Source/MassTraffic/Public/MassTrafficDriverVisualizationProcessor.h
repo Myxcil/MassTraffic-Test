@@ -3,11 +3,11 @@
 #pragma once
 
 #include "MassTrafficDamage.h"
-
 #include "MassRepresentationProcessor.h"
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassActorSubsystem.h"
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTrafficInstancePlaybackHelpers.h"
-
 #include "MassTrafficDriverVisualizationProcessor.generated.h"
 
 class UAnimToTextureDataAsset;
@@ -24,9 +24,10 @@ class MASSTRAFFIC_API UMassTrafficDriverVisualizationProcessor : public UMassPro
 public:
 	UMassTrafficDriverVisualizationProcessor();
 
+protected:
 	/** Configure the owned FMassEntityQuery instances to express processor's requirements */
-	virtual void ConfigureQueries() override;
-	virtual void Initialize(UObject& Owner) override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 private:

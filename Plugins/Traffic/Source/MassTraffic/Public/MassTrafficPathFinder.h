@@ -25,15 +25,15 @@ public:
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	virtual void BeginPlay() override;
 
-	bool SearchPath(const FVector& End);
-
+	bool SearchShortestPath(const TArray<FVector>& Starts, const TArray<FVector>& Ends);
+	bool SearchPath(const FVector& Start, const FVector& End);
+	
 	void InitPathFollowing();
 	bool UpdatePathFollowing(const float LookAheadDistance, FVector& TargetPosition, FQuat& TargetOrientation);
-	bool HasPath() const { return LanePath.IsValidIndex(LanePathIndex); }
 
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
-	const FZoneGraphLaneLocation& GetOrigin() const { return Origin; }
-	const FZoneGraphLaneLocation& GetDestination() const { return Destination; }
+	const FZoneGraphLaneLocation& GetOrigin() const { return CurrentPath.Origin; }
+	const FZoneGraphLaneLocation& GetDestination() const { return CurrentPath.Destination; }
 	
 	const FZoneGraphStorage* GetZoneGraphStorage(const FZoneGraphLaneHandle& LaneHandle) const;
 
@@ -42,7 +42,7 @@ public:
 	const FZoneGraphTrafficLaneData* GetNextLane() const;
 
 	bool GetLastLaneLocation(FVector& Location) const { Location =  CurrLocation.Position; return CurrLocation.IsValid(); }
-	float UpdateLaneLength(const FZoneGraphTrafficLaneData* CurrLane) const;
+	float CalculateActualLaneLength(const FZoneGraphTrafficLaneData* CurrLane) const;
 	float GetDistanceToNextLane() const;
 
 	void SetEmergencyLane(const FZoneGraphLaneHandle& LaneHandle, const bool bIsEmergencyLane);
@@ -52,8 +52,10 @@ public:
 	
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 #if WITH_EDITOR
-	const TArray<const FZoneGraphTrafficLaneData*>& GetLastCalculatedPath() const { return LanePath; }
+	template<typename Func>
+	void ForEachLaneInPath(const Func& Functor) const { for(int32 I=0; I < CurrentPath.Path.Num(); ++I) Functor(CurrentPath.Path[I]); }
 	const FColor& GetPathDebugColor() const { return PathDebugColor; }
+	void GetLastTarget(FVector& Position, FQuat& Rotation) const { Position = LastTargetPosition; Rotation = LastTargetOrientation; }	
 #endif
 
 protected:
@@ -61,12 +63,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, meta=(Tooltip="Which zone graph tags should be used for path finding"))
 	FZoneGraphTagFilter ZoneGraphTagFilter;
 	UPROPERTY(EditDefaultsOnly, meta=(Tooltip="Needed to offset the distance along destination lane or car will stop too soon"))
+	float LaneSearchRadius = 500.0f;
+	UPROPERTY(EditDefaultsOnly, meta=(Tooltip="Needed to offset the distance along destination lane or car will stop too soon"))
 	float DestinationLaneOffset = 400.0f;
 #if WITH_EDITORONLY_DATA	
 	UPROPERTY(EditAnywhere)
 	FColor PathDebugColor = FColor::Yellow;
 #endif
 
+	//--------------------------------------------------------------------------------------------------------------------------------------------------------
+	struct FTrafficPath
+	{
+		FZoneGraphLaneLocation Origin;
+		FZoneGraphLaneLocation Destination;
+		TArray<const FZoneGraphTrafficLaneData*> Path;
+
+		void Reset() { Origin.Reset(); Destination.Reset(); Path.Reset(); }
+		bool IsValid() const { return Origin.IsValid() && Destination.IsValid() && Path.Num() > 2; }
+	};
+	
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	struct FLaneNode
 	{
@@ -77,6 +92,8 @@ protected:
 		float EstimateCostToGoal;
 		float TotalCost;
 	};
+
+	bool SearchPath(const FVector& Start, const FVector& End, FTrafficPath& TrafficPath);
 
 	// Returns nearest lane to given location (world-space), search area affected by LaneSearchExtents
 	bool FindNearestLane(const FVector& Location, const float SearchSize, FZoneGraphLaneLocation& LaneLocation) const;
@@ -89,18 +106,22 @@ protected:
 	// Check lane connections and update OpenList according to A*
 	void EvaluateLane(const FZoneGraphTrafficLaneData* Lane, const FZoneGraphTrafficLaneData* To);
 
+	static float CalculatePathLength(const FTrafficPath& TrafficPath);
+	
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	TWeakObjectPtr<const UMassTrafficSettings> MassTrafficSettings = nullptr;
 	TObjectPtr<UMassTrafficSubsystem> MassTrafficSubsystem = nullptr;
 	TObjectPtr<UZoneGraphSubsystem> ZoneGraphSubsystem = nullptr;
 
-	FZoneGraphLaneLocation Origin;
-	FZoneGraphLaneLocation Destination;
 	TMap<const FZoneGraphTrafficLaneData*, FLaneNode> LaneNodes;
 	TArray<const FZoneGraphTrafficLaneData*> OpenList;
 	uint32 CurrentSearchIndex = 0;
 
-	TArray<const FZoneGraphTrafficLaneData*> LanePath;
+	FTrafficPath CurrentPath;
 	FZoneGraphLaneLocation CurrLocation;
 	int32 LanePathIndex = -1;
+	float LastValidDistanceAlongLane = 0;
+
+	FVector LastTargetPosition = FVector::ZeroVector;
+	FQuat LastTargetOrientation = FQuat::Identity;;
 };

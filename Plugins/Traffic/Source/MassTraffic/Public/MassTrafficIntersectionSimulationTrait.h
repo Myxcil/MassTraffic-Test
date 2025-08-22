@@ -3,7 +3,6 @@
 #pragma once
 
 #include "MassEntityTraitBase.h"
-
 #include "MassTrafficIntersectionSimulationTrait.generated.h"
 
 UCLASS(meta=(DisplayName="Traffic Intersection Simulation"))

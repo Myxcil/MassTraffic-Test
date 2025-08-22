@@ -3,7 +3,6 @@
 #pragma once
 
 #include "MassRepresentationActorManagement.h"
-
 #include "MassTrafficVehicleRepresentationActorManagement.generated.h"
 
 struct FMassEntityView;

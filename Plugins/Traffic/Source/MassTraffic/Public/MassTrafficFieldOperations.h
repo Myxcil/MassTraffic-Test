@@ -5,9 +5,9 @@
 #include "MassTrafficProcessorBase.h"
 #include "MassTrafficFieldComponent.h"
 #include "MassTrafficFragments.h"
-
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassLODSubsystem.h"
-
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTrafficFieldOperations.generated.h"
 
 
@@ -73,7 +73,7 @@ public:
 	UMassTrafficFieldOperationsProcessorBase();
 
 protected:
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	virtual bool ShouldAllowQueryBasedPruning(const bool bRuntimeMode = true) const override { return false; }
@@ -156,7 +156,7 @@ public:
 	UMassTrafficFrameStartFieldOperationsProcessor();
 
 protected:
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 };
 

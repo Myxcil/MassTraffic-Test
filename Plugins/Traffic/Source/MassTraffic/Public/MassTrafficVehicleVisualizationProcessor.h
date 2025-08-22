@@ -4,7 +4,6 @@
 
 #include "MassRepresentationProcessor.h"
 #include "MassTrafficFragments.h"
-
 #include "MassTrafficVehicleVisualizationProcessor.generated.h"
 
 
@@ -108,7 +107,7 @@ public:
 	UMassTrafficVehicleVisualizationProcessor();
 
 	/** Configure the owned FMassEntityQuery instances to express processor's requirements */
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 };
 
 /**
@@ -123,9 +122,9 @@ public:
 	UMassTrafficVehicleUpdateCustomVisualizationProcessor();
 
 protected:
-	virtual void Initialize(UObject& Owner) override;
+	virtual void InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager) override;
 	/** Configure the owned FMassEntityQuery instances to express processor's requirements */
-	virtual void ConfigureQueries() override;
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	FMassEntityQuery EntityQuery;

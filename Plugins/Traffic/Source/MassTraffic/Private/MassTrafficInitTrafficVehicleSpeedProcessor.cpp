@@ -5,7 +5,9 @@
 #include "MassTrafficMovement.h"
 #include "MassExecutionContext.h"
 #include "MassCommonFragments.h"
+#include "MassTrafficUtils.h"
 #include "MassZoneGraphNavigationFragments.h"
+
 
 UMassTrafficInitTrafficVehicleSpeedProcessor::UMassTrafficInitTrafficVehicleSpeedProcessor()
 	: EntityQuery(*this)
@@ -13,7 +15,7 @@ UMassTrafficInitTrafficVehicleSpeedProcessor::UMassTrafficInitTrafficVehicleSpee
 	bAutoRegisterWithProcessingPhases = false;
 }
 
-void UMassTrafficInitTrafficVehicleSpeedProcessor::ConfigureQueries()
+void UMassTrafficInitTrafficVehicleSpeedProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	EntityQuery.AddRequirement<FMassTrafficRandomFractionFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FMassTrafficObstacleAvoidanceFragment>(EMassFragmentAccess::ReadOnly);
@@ -25,22 +27,21 @@ void UMassTrafficInitTrafficVehicleSpeedProcessor::ConfigureQueries()
 void UMassTrafficInitTrafficVehicleSpeedProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
 	// Advance agents
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& QueryContext)
 	{
-		const int32 NumEntities = QueryContext.GetNumEntities();
 		const TConstArrayView<FMassTrafficRandomFractionFragment> RandomFractionFragments = QueryContext.GetFragmentView<FMassTrafficRandomFractionFragment>();
 		const TConstArrayView<FMassTrafficObstacleAvoidanceFragment> AvoidanceFragments = QueryContext.GetFragmentView<FMassTrafficObstacleAvoidanceFragment>();
 		const TConstArrayView<FAgentRadiusFragment> RadiusFragments = QueryContext.GetFragmentView<FAgentRadiusFragment>();
 		const TConstArrayView<FMassZoneGraphLaneLocationFragment> LaneLocationFragments = QueryContext.GetFragmentView<FMassZoneGraphLaneLocationFragment>();
 		const TArrayView<FMassTrafficVehicleControlFragment> VehicleControlFragments = QueryContext.GetMutableFragmentView<FMassTrafficVehicleControlFragment>();
 
-		for (int32 Index = 0; Index < NumEntities; ++Index)
+		for (FMassExecutionContext::FEntityIterator EntityIt = QueryContext.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			const FMassTrafficRandomFractionFragment& RandomFractionFragment = RandomFractionFragments[Index];
-			const FAgentRadiusFragment& AgentRadiusFragment = RadiusFragments[Index];
-			const FMassTrafficObstacleAvoidanceFragment& AvoidanceFragment = AvoidanceFragments[Index];
-			const FMassZoneGraphLaneLocationFragment& LaneLocationFragment = LaneLocationFragments[Index];
-			FMassTrafficVehicleControlFragment& VehicleControlFragment = VehicleControlFragments[Index];
+			const FMassTrafficRandomFractionFragment& RandomFractionFragment = RandomFractionFragments[EntityIt];
+			const FAgentRadiusFragment& AgentRadiusFragment = RadiusFragments[EntityIt];
+			const FMassTrafficObstacleAvoidanceFragment& AvoidanceFragment = AvoidanceFragments[EntityIt];
+			const FMassZoneGraphLaneLocationFragment& LaneLocationFragment = LaneLocationFragments[EntityIt];
+			FMassTrafficVehicleControlFragment& VehicleControlFragment = VehicleControlFragments[EntityIt];
 
 			
 			// Compute stable distance based noise
@@ -96,13 +97,13 @@ void UMassTrafficInitTrafficVehicleSpeedProcessor::Execute(FMassEntityManager& E
 				VariedSpeedLimit,
 				MassTrafficSettings->IdealTimeToNextVehicleRange,
 				MassTrafficSettings->MinimumDistanceToNextVehicleRange,
-				/*NextVehicleAvoidanceBrakingPower*/3.0f, // @todo Expose
+				MassTrafficSettings->NextVehicleAvoidanceBrakingPower,
 				MassTrafficSettings->ObstacleAvoidanceBrakingTimeRange,
 				MassTrafficSettings->MinimumDistanceToObstacleRange,
-				/*ObstacleAvoidanceBrakingPower*/0.5f, // @todo Expose
+				MassTrafficSettings->ObstacleAvoidanceBrakingPower,
 				MassTrafficSettings->StopSignBrakingTime,
 				MassTrafficSettings->StoppingDistanceRange,
-				/*StopSignBrakingPower*/0.5f, // @todo Expose
+				MassTrafficSettings->StopSignBrakingPower,
 				bMustStopAtLaneExit
 			);
 

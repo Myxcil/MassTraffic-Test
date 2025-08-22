@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficInitIntersectionsProcessor.h"
+#include "MassCommonFragments.h"
 #include "MassTrafficFragments.h"
 #include "MassTrafficDelegates.h"
 #include "MassTrafficFieldOperations.h"
@@ -14,7 +15,7 @@ UMassTrafficInitIntersectionsProcessor::UMassTrafficInitIntersectionsProcessor()
 	bAutoRegisterWithProcessingPhases = false;
 }
 
-void UMassTrafficInitIntersectionsProcessor::ConfigureQueries() 
+void UMassTrafficInitIntersectionsProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) 
 {
 	EntityQuery.AddRequirement<FMassTrafficIntersectionFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
@@ -36,7 +37,7 @@ void UMassTrafficInitIntersectionsProcessor::Execute(FMassEntityManager& EntityM
 	
 	// Process chunks
 	int32 Offset = 0;
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& QueryContext)
 	{
 		// Get Mass crowd subsystem.
 		UMassCrowdSubsystem* MassCrowdSubsystem = QueryContext.GetMutableSubsystem<UMassCrowdSubsystem>();
@@ -56,16 +57,16 @@ void UMassTrafficInitIntersectionsProcessor::Execute(FMassEntityManager& EntityM
 		FMemory::Memswap(TransformFragments.GetData(), &IntersectionsSpawnData.IntersectionTransforms[Offset], sizeof(FTransformFragment) * NumEntities);
 
 		// Init intersection lane states -
-		for (int32 Index = 0; Index < NumEntities; ++Index)
+		for (FMassExecutionContext::FEntityIterator EntityIt = QueryContext.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			FMassTrafficIntersectionFragment& TrafficIntersectionFragment = TrafficIntersectionFragments[Index];
+			FMassTrafficIntersectionFragment& TrafficIntersectionFragment = TrafficIntersectionFragments[EntityIt];
 
 			// Close all vehicle and pedestrian lanes, and stop all traffic lights, controlled by this intersection.
 			// The 'update intersection processor' will take it from here.
 			TrafficIntersectionFragment.RestartIntersection(MassCrowdSubsystem);
 
 			// Cache intersection entities in the traffic coordinator
-			MassTrafficSubsystem->RegisterTrafficIntersectionEntity(TrafficIntersectionFragment.ZoneIndex, QueryContext.GetEntity(Index));
+			MassTrafficSubsystem->RegisterTrafficIntersectionEntity(TrafficIntersectionFragment.ZoneIndex, QueryContext.GetEntity(EntityIt));
 		}
 
 		Offset += NumEntities;

@@ -14,11 +14,9 @@ class MASSTRAFFIC_API UMassTrafficProcessorBase : public UMassProcessor
 {
 	GENERATED_BODY()
 
-public:
-	
-	virtual void Initialize(UObject& InOwner) override;
-	
 protected:
+
+	virtual void InitializeInternal(UObject& InOwner, const TSharedRef<FMassEntityManager>& EntityManager) override;
 
 	TWeakObjectPtr<const UMassTrafficSettings> MassTrafficSettings;
 

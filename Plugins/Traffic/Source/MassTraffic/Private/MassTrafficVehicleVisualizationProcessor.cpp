@@ -162,9 +162,9 @@ UMassTrafficVehicleVisualizationProcessor::UMassTrafficVehicleVisualizationProce
 	ExecutionOrder.ExecuteAfter.Add(UMassTrafficDamageRepairProcessor::StaticClass()->GetFName());
 }
 
-void UMassTrafficVehicleVisualizationProcessor::ConfigureQueries()
+void UMassTrafficVehicleVisualizationProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
-	Super::ConfigureQueries();
+	Super::ConfigureQueries(EntityManager);
 
 	EntityQuery.AddTagRequirement<FMassTrafficVehicleTag>(EMassFragmentPresence::All);
 }
@@ -188,15 +188,15 @@ UMassTrafficVehicleUpdateCustomVisualizationProcessor::UMassTrafficVehicleUpdate
 	ExecutionOrder.ExecuteAfter.Add(UMassTrafficVehicleVisualizationProcessor::StaticClass()->GetFName());
 }
 
-void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Initialize(UObject& Owner)
+void UMassTrafficVehicleUpdateCustomVisualizationProcessor::InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager)
 {
-	Super::Initialize(Owner);
+	Super::InitializeInternal(Owner, EntityManager);
 #if WITH_MASSTRAFFIC_DEBUG
 	LogOwner = UWorld::GetSubsystem<UMassTrafficSubsystem>(Owner.GetWorld());
 #endif // WITH_MASSTRAFFIC_DEBUG
 }
 
-void UMassTrafficVehicleUpdateCustomVisualizationProcessor::ConfigureQueries()
+void UMassTrafficVehicleUpdateCustomVisualizationProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	EntityQuery.AddTagRequirement<FMassTrafficVehicleTag>(EMassFragmentPresence::All);
 	
@@ -219,9 +219,9 @@ void UMassTrafficVehicleUpdateCustomVisualizationProcessor::ConfigureQueries()
 	EntityQuery.SetChunkFilter(&FMassVisualizationChunkFragment::AreAnyEntitiesVisibleInChunk);
 }
 
-void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& ExecutionContext)
 {
-	EntityQuery.ForEachEntityChunk(EntityManager, Context, [this](FMassExecutionContext& Context)
+	EntityQuery.ForEachEntityChunk(ExecutionContext, [this](FMassExecutionContext& Context)
 	{
 		// Get mutable ISMInfos to append instances & custom data to
 		UMassRepresentationSubsystem* RepresentationSubsystem = Context.GetMutableSharedFragment<FMassRepresentationSubsystemSharedFragment>().RepresentationSubsystem;
@@ -236,17 +236,16 @@ void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 		const TArrayView<FMassActorFragment> ActorFragments = Context.GetMutableFragmentView<FMassActorFragment>();
 		const TArrayView<FMassRepresentationFragment> VisualizationFragments = Context.GetMutableFragmentView<FMassRepresentationFragment>();
 
-		const int32 NumEntities = Context.GetNumEntities();
-		for (int32 EntityIdx = 0; EntityIdx < NumEntities; EntityIdx++)
+		for (FMassExecutionContext::FEntityIterator EntityIt = Context.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			const FMassEntityHandle Entity = Context.GetEntity(EntityIdx);
+			const FMassEntityHandle Entity = Context.GetEntity(EntityIt);
 
-			const FMassTrafficRandomFractionFragment& RandomFractionFragment = RandomFractionFragments[EntityIdx];
-			const FMassTrafficVehicleLightsFragment& VehicleStateFragment = VehicleStateFragments[EntityIdx];
-			const FTransformFragment& TransformFragment = TransformFragments[EntityIdx];
-			const FMassRepresentationLODFragment& RepresentationLODFragment = RepresentationLODFragments[EntityIdx];
-			FMassActorFragment& ActorFragment = ActorFragments[EntityIdx];
-			FMassRepresentationFragment& RepresentationFragment = VisualizationFragments[EntityIdx];
+			const FMassTrafficRandomFractionFragment& RandomFractionFragment = RandomFractionFragments[EntityIt];
+			const FMassTrafficVehicleLightsFragment& VehicleStateFragment = VehicleStateFragments[EntityIt];
+			const FTransformFragment& TransformFragment = TransformFragments[EntityIt];
+			const FMassRepresentationLODFragment& RepresentationLODFragment = RepresentationLODFragments[EntityIt];
+			FMassActorFragment& ActorFragment = ActorFragments[EntityIt];
+			FMassRepresentationFragment& RepresentationFragment = VisualizationFragments[EntityIt];
 
 			AActor* Actor = ActorFragment.GetMutable();
 			
@@ -277,7 +276,7 @@ void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 						{
 							// Teleport actor to simulated position
 							const FTransform NewActorTransform = TransformFragment.GetTransform();
-							Context.Defer().PushCommand<FMassDeferredSetCommand>([Actor, NewActorTransform](FMassEntityManager& System)
+							Context.Defer().PushCommand<FMassDeferredSetCommand>([Actor, NewActorTransform](FMassEntityManager&)
 							{
 								Actor->SetActorTransform(NewActorTransform);
 							});
@@ -364,24 +363,23 @@ void UMassTrafficVehicleUpdateCustomVisualizationProcessor::Execute(FMassEntityM
 		UWorld* World = EntityManager.GetWorld();
 		const UObject* LogOwnerPtr = LogOwner.Get();
 
-		DebugEntityQuery.ForEachEntityChunk(EntityManager, Context, [World, LogOwnerPtr](FMassExecutionContext& Context)
+		DebugEntityQuery.ForEachEntityChunk(ExecutionContext, [World, LogOwnerPtr](FMassExecutionContext& Context)
 			{
-				const int32 NumEntities = Context.GetNumEntities();
 				const TConstArrayView<FTransformFragment> TransformList = Context.GetFragmentView<FTransformFragment>();
 				const TConstArrayView<FMassTrafficDebugFragment> TrafficDebugFragments = Context.GetFragmentView<FMassTrafficDebugFragment>();
 				const TArrayView<FMassRepresentationFragment> VisualizationList = Context.GetMutableFragmentView<FMassRepresentationFragment>();
 
-				for (int EntityIdx = 0; EntityIdx < NumEntities; EntityIdx++)
+				for (FMassExecutionContext::FEntityIterator EntityIt = Context.CreateEntityIterator(); EntityIt; ++EntityIt)
 				{
-					const FTransformFragment& TransformFragment = TransformList[EntityIdx];
-					FMassRepresentationFragment& Visualization = VisualizationList[EntityIdx];
+					const FTransformFragment& TransformFragment = TransformList[EntityIt];
+					FMassRepresentationFragment& Visualization = VisualizationList[EntityIt];
 					const int32 CurrentVisualIdx = static_cast<int32>(Visualization.CurrentRepresentation);
 					DrawDebugPoint(World, TransformFragment.GetTransform().GetLocation() + FVector(50.0f, 0.0f, 200.0f), 10.0f, UE::MassLOD::LODColors[CurrentVisualIdx]);
 
-					const bool bVisLogEvenIfOff = TrafficDebugFragments.Num() > 0 && TrafficDebugFragments[EntityIdx].bVisLog;
+					const bool bVisLogEvenIfOff = TrafficDebugFragments.Num() > 0 && TrafficDebugFragments[EntityIt].bVisLog;
 					if (((Visualization.CurrentRepresentation != EMassRepresentationType::None || bVisLogEvenIfOff) && GMassTrafficDebugVisualization >= 2) || GMassTrafficDebugVisualization >= 3)
 					{
-						UE_VLOG_LOCATION(LogOwnerPtr, TEXT("MassTraffic Vis"), Log, TransformFragment.GetTransform().GetLocation() + FVector(50.0f, 0.0f, 200.0f), /*Radius*/ 10.0f, UE::MassLOD::LODColors[CurrentVisualIdx], TEXT("%d %d"), CurrentVisualIdx, Context.GetEntity(EntityIdx).Index);
+						UE_VLOG_LOCATION(LogOwnerPtr, TEXT("MassTraffic Vis"), Log, TransformFragment.GetTransform().GetLocation() + FVector(50.0f, 0.0f, 200.0f), /*Radius*/ 10.0f, UE::MassLOD::LODColors[CurrentVisualIdx], TEXT("%d %d"), CurrentVisualIdx, Context.GetEntity(EntityIt).Index);
 					}
 				}
 			});

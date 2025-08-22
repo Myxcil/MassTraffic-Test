@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MassTrafficFindDeviantParkedVehiclesProcessor.h"
+#include "MassActorSubsystem.h"
 #include "MassTrafficFragments.h"
-
 #include "MassNavigationFragments.h"
 #include "MassMovementFragments.h"
 #include "MassCrowdFragments.h"
@@ -10,8 +10,8 @@
 #include "MassCommonFragments.h"
 #include "MassExecutionContext.h"
 #include "MassLookAtFragments.h"
-#include "MassTrafficVehicleVolumeTrait.h"
 #include "MassTrafficVehicleSimulationTrait.h"
+#include "MassTrafficVehicleVolumeTrait.h"
 #include "VisualLogger/VisualLogger.h"
 
 
@@ -22,7 +22,7 @@ UMassTrafficFindDeviantParkedVehiclesProcessor::UMassTrafficFindDeviantParkedVeh
 	ExecutionOrder.ExecuteInGroup = UE::MassTraffic::ProcessorGroupNames::ParkedVehicleBehavior;
 }
 
-void UMassTrafficFindDeviantParkedVehiclesProcessor::ConfigureQueries()
+void UMassTrafficFindDeviantParkedVehiclesProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	NominalParkedVehicleEntityQuery.AddTagRequirement<FMassTrafficParkedVehicleTag>(EMassFragmentPresence::All);
 	NominalParkedVehicleEntityQuery.AddTagRequirement<FMassTrafficDisturbedVehicleTag>(EMassFragmentPresence::None);
@@ -35,18 +35,17 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::ConfigureQueries()
 void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
 	// Look for deviant vehicles
-	NominalParkedVehicleEntityQuery.ForEachEntityChunk(EntityManager, Context, [this](FMassExecutionContext& QueryContext)
+	NominalParkedVehicleEntityQuery.ForEachEntityChunk(Context, [this](FMassExecutionContext& QueryContext)
 	{
 		const FMassTrafficVehicleVolumeParameters& ObstacleParameters = QueryContext.GetConstSharedFragment<FMassTrafficVehicleVolumeParameters>();
 		const TConstArrayView<FTransformFragment> TransformFragments = QueryContext.GetFragmentView<FTransformFragment>();
 		const TConstArrayView<FMassActorFragment> ActorFragments = QueryContext.GetFragmentView<FMassActorFragment>();
 
 		// Loop obstacles
-		const int32 NumEntities = QueryContext.GetNumEntities();
-		for (int32 Index = 0; Index < NumEntities; ++Index)
+		for (FMassExecutionContext::FEntityIterator EntityIt = QueryContext.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			const FTransformFragment& TransformFragment = TransformFragments[Index];
-			const FMassActorFragment& ActorFragment = ActorFragments[Index];
+			const FTransformFragment& TransformFragment = TransformFragments[EntityIt];
+			const FMassActorFragment& ActorFragment = ActorFragments[EntityIt];
 			const AActor* Actor = ActorFragment.Get();
 
 			if (Actor != nullptr)
@@ -57,7 +56,7 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager&
 				const float Deviation = FVector::Distance(TransformFragment.GetTransform().GetLocation(), ActorLocation);
 				if (Deviation > MassTrafficSettings->ParkedVehicleDeviationTolerance)
 				{
-					const FMassEntityHandle ParkedVehicleEntity = QueryContext.GetEntity(Index);
+					const FMassEntityHandle ParkedVehicleEntity = QueryContext.GetEntity(EntityIt);
 
 					// Add an FTagFragment_MassTrafficObstacle tag to it so it's considered for obstacle avoidance.
 					QueryContext.Defer().AddTag<FMassTrafficObstacleTag>(ParkedVehicleEntity);
@@ -65,7 +64,7 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager&
 					QueryContext.Defer().AddTag<FMassTrafficDisturbedVehicleTag>(ParkedVehicleEntity);
 
 					// Add fragments to allow both traffic and crowd systems to notice this vehicle as an obstacle. 
-					QueryContext.Defer().AddTag<FMassLookAtTargetTag>(ParkedVehicleEntity);
+					QueryContext.Defer().AddFragment<FMassLookAtTargetFragment>(ParkedVehicleEntity);
 					QueryContext.Defer().PushCommand<FMassCommandAddFragments<
 						FMassNavigationObstacleGridCellLocationFragment		// Needed to become a crowd avoidance obstacle
 						, FMassCrowdObstacleFragment						// Needed to be a zone graph dynamic obstacle
@@ -82,7 +81,7 @@ void UMassTrafficFindDeviantParkedVehiclesProcessor::Execute(FMassEntityManager&
 					QueryContext.Defer().PushCommand<FMassCommandAddFragmentInstances>(ParkedVehicleEntity, ColliderFragment, RadiusFragment);
 
 					// Debug
-					UE_VLOG_LOCATION(LogOwner, TEXT("MassTraffic Deviants"), Log, ActorLocation, 10.0f, FColor::Red, TEXT("%d Deviated by %f"), QueryContext.GetEntity(Index).Index, Deviation);
+					UE_VLOG_LOCATION(LogOwner, TEXT("MassTraffic Deviants"), Log, ActorLocation, 10.0f, FColor::Red, TEXT("%d Deviated by %f"), QueryContext.GetEntity(EntityIt).Index, Deviation);
 					UE_VLOG_SEGMENT_THICK(LogOwner, TEXT("MassTraffic Deviants"), Log, ActorLocation, TransformFragment.GetTransform().GetLocation(), FColor::Red, 3.0f, TEXT(""));
 				}
 			}

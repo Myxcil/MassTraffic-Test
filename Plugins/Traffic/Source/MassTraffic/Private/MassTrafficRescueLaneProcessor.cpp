@@ -6,7 +6,7 @@
 #include "MassExecutionContext.h"
 #include "MassZoneGraphNavigationFragments.h"
 #include "MassTrafficVehicleVolumeTrait.h"
-#include "MassGameplayExternalTraits.h" // KEEP THIS UNDER ALL CIRCUMSTANCES OR ELSE COMPILE WILL FAIL!!!!
+#include "MassExternalSubsystemTraits.h" // KEEP THIS UNDER ALL CIRCUMSTANCES OR ELSE COMPILE WILL FAIL!!!!
 
 
 UMassTrafficRescueLaneProcessor::UMassTrafficRescueLaneProcessor() :
@@ -19,7 +19,7 @@ UMassTrafficRescueLaneProcessor::UMassTrafficRescueLaneProcessor() :
 	ExecutionOrder.ExecuteAfter.Add(UE::MassTraffic::ProcessorGroupNames::VehicleSimulationLOD);
 }
 
-void UMassTrafficRescueLaneProcessor::ConfigureQueries()
+void UMassTrafficRescueLaneProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	EMVehicleQuery.AddTagRequirement<FMassTrafficObstacleTag>(EMassFragmentPresence::All);
 	EMVehicleQuery.AddTagRequirement<FMassTrafficEmergencyTag>(EMassFragmentPresence::All);
@@ -41,7 +41,7 @@ void UMassTrafficRescueLaneProcessor::Execute(FMassEntityManager& EntityManager,
 	
 	// first, get all the active EM vehicles
 	TArray<FMassEntityHandle> EMVehicles;
-	EMVehicleQuery.ForEachEntityChunk(EntityManager, Context, [&](const FMassExecutionContext& QueryContext)
+	EMVehicleQuery.ForEachEntityChunk( Context, [&](const FMassExecutionContext& QueryContext)
 	{
 		const int32 NumEntities = QueryContext.GetNumEntities();
 		for(int32 EntityIndex = 0; EntityIndex < NumEntities; ++EntityIndex)
@@ -53,7 +53,7 @@ void UMassTrafficRescueLaneProcessor::Execute(FMassEntityManager& EntityManager,
 	const int32 NumEMVehicles = EMVehicles.Num();
 	const float EMRecognitionDistanceSquared = MassTrafficSettings->RescueLaneEMRecognitionDistance * MassTrafficSettings->RescueLaneEMRecognitionDistance;
 
-	VehicleQuery.ForEachEntityChunk(EntityManager, Context, [&](FMassExecutionContext& QueryContext)
+	VehicleQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
 	{
 		const TConstArrayView<FTransformFragment> TransformFragments = QueryContext.GetFragmentView<FTransformFragment>();
 		const TConstArrayView<FMassZoneGraphLaneLocationFragment> LaneLocationFragments = QueryContext.GetFragmentView<FMassZoneGraphLaneLocationFragment>();
