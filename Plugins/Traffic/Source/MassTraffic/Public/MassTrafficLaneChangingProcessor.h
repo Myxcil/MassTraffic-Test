@@ -2,10 +2,11 @@
 
 #pragma once
 
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassActorSubsystem.h"
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTrafficProcessorBase.h"
 #include "MassTrafficFragments.h"
-#include "MassActorSubsystem.h"
 #include "MassTrafficLaneChangingProcessor.generated.h"
 
 
@@ -19,7 +20,7 @@ class MASSTRAFFIC_API UMassTrafficLaneChangingProcessor : public UMassTrafficPro
 protected:
 	UMassTrafficLaneChangingProcessor();
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
-	virtual void Execute(FMassEntityManager& EntitySubSystem, FMassExecutionContext& Context) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	FMassEntityQuery StartNewLaneChangesEntityQuery_Conditional;
 	FMassEntityQuery UpdateLaneChangesEntityQuery_Conditional;

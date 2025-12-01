@@ -22,11 +22,11 @@ void UMassTrafficInitTrailersProcessor::ConfigureQueries(const TSharedRef<FMassE
 	EntityQuery.AddRequirement<FMassTrafficRandomFractionFragment>(EMassFragmentAccess::ReadWrite);
 }
 
-void UMassTrafficInitTrailersProcessor::InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager)
+void UMassTrafficInitTrailersProcessor::InitializeInternal(UObject& InOwner, const TSharedRef<FMassEntityManager>& EntityManager)
 {
-	Super::InitializeInternal(Owner, EntityManager);
+	Super::InitializeInternal(InOwner, EntityManager);
 
-	MassRepresentationSubsystem = UWorld::GetSubsystem<UMassRepresentationSubsystem>(Owner.GetWorld());
+	MassRepresentationSubsystem = UWorld::GetSubsystem<UMassRepresentationSubsystem>(InOwner.GetWorld());
 }
 
 void UMassTrafficInitTrailersProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -44,16 +44,15 @@ void UMassTrafficInitTrailersProcessor::Execute(FMassEntityManager& EntityManage
 
 	// Init dynamic trailer data 
 	int32 TrailerIndex = 0;
-	EntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& QueryContext)
 	{
-		const int32 NumEntities = QueryContext.GetNumEntities();
 		const TArrayView<FMassTrafficConstrainedVehicleFragment> VehicleConstraintFragments = QueryContext.GetMutableFragmentView<FMassTrafficConstrainedVehicleFragment>();
 		const TArrayView<FMassTrafficRandomFractionFragment> RandomFractionFragments = QueryContext.GetMutableFragmentView<FMassTrafficRandomFractionFragment>();
 
-		for (int32 EntityIndex = 0; EntityIndex < NumEntities; ++EntityIndex)
+		for (FMassExecutionContext::FEntityIterator EntityIt = QueryContext.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			FMassTrafficConstrainedVehicleFragment& VehicleConstraintFragment = VehicleConstraintFragments[EntityIndex];
-			FMassTrafficRandomFractionFragment& RandomFractionFragment = RandomFractionFragments[EntityIndex];
+			FMassTrafficConstrainedVehicleFragment& VehicleConstraintFragment = VehicleConstraintFragments[EntityIt];
+			FMassTrafficRandomFractionFragment& RandomFractionFragment = RandomFractionFragments[EntityIt];
 
 			// Init constraint to vehicle
 			check(TrailersSpawnData.TrailerVehicles.IsValidIndex(TrailerIndex));
@@ -63,7 +62,7 @@ void UMassTrafficInitTrailersProcessor::Execute(FMassEntityManager& EntityManage
 			if (ensure(VehicleConstraintFragment.Vehicle.IsSet()))
 			{
 				FMassEntityView VehicleMassEntityView(EntityManager, VehicleConstraintFragment.Vehicle);
-				VehicleMassEntityView.GetFragmentData<FMassTrafficConstrainedTrailerFragment>().Trailer = Context.GetEntity(EntityIndex);
+				VehicleMassEntityView.GetFragmentData<FMassTrafficConstrainedTrailerFragment>().Trailer = Context.GetEntity(EntityIt);
 			}
 
 			// Init random fraction

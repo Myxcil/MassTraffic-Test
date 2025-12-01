@@ -4,8 +4,10 @@
 
 #include "MassTrafficProcessorBase.h"
 #include "MassTrafficFragments.h"
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassActorSubsystem.h"
 #include "MassCommonFragments.h"
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTrafficFindDeviantTrafficVehiclesProcessor.generated.h"
 
 
@@ -21,7 +23,7 @@ public:
 
 protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
-	virtual void Execute(FMassEntityManager& EntitySubSystem, FMassExecutionContext& Context) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	FMassEntityQuery NominalTrafficVehicleEntityQuery;
 	

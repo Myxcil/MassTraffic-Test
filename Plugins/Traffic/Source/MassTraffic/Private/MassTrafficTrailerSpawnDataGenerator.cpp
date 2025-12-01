@@ -8,12 +8,15 @@
 #include "MassEntityConfigAsset.h"
 #include "MassEntityManager.h"
 #include "MassCommonFragments.h"
-#include "MassEntitySubsystem.h"
 #include "MassEntityUtils.h"
 
 
-UMassTrafficTrailerSpawnDataGenerator::UMassTrafficTrailerSpawnDataGenerator()
+void UMassTrafficTrailerSpawnDataGenerator::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) const
 {
+	VehicleQuery.Initialize(EntityManager);
+	VehicleQuery.AddTagRequirement<FMassTrafficVehicleTag>(EMassFragmentPresence::All);
+	VehicleQuery.AddConstSharedRequirement<FMassTrafficConstrainedTrailerParameters>(EMassFragmentPresence::All);
+	VehicleQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly, EMassFragmentPresence::All); // Need at least 1 fragment access for valid query 
 }
 
 void UMassTrafficTrailerSpawnDataGenerator::Generate(UObject& QueryOwner,
@@ -25,23 +28,20 @@ void UMassTrafficTrailerSpawnDataGenerator::Generate(UObject& QueryOwner,
 	// Get subsystems
 	UWorld* World = GetWorld();
 	check(World);
+	FMassEntityManager& EntityManager = UE::Mass::Utils::GetEntityManagerChecked(*World);
 
-	UMassEntitySubsystem* EntitySubsystem = World->GetSubsystem<UMassEntitySubsystem>();
-	check(EntitySubsystem);
-	TSharedPtr<FMassEntityManager> EntityManager = EntitySubsystem->GetMutableEntityManager().AsShared();
+	if (VehicleQuery.IsInitialized() == false)
+	{
+		ConfigureQueries(EntityManager.AsShared());
+	}
 
 	// Prepare spawn data
 	TArray<FMassEntitySpawnDataGeneratorResult> Results;
 	BuildResultsFromEntityTypes(Count, EntityTypes, Results);
 
-	FMassEntityQuery VehicleQuery(EntityManager);
-	VehicleQuery.AddTagRequirement<FMassTrafficVehicleTag>(EMassFragmentPresence::All);
-	VehicleQuery.AddConstSharedRequirement<FMassTrafficConstrainedTrailerParameters>(EMassFragmentPresence::All);
-	VehicleQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly, EMassFragmentPresence::All); // Need at least 1 fragment access for valid query 
-
 	// Find vehicle to spawn trailers for
-	FMassExecutionContext ExecutionContext(*EntityManager.Get(), 0.0f);
-	VehicleQuery.ForEachEntityChunk( ExecutionContext, [&Results, &EntityTypes](FMassExecutionContext& QueryContext)
+	FMassExecutionContext ExecutionContext(EntityManager, 0.0f);
+	VehicleQuery.ForEachEntityChunk(ExecutionContext, [&Results, &EntityTypes](FMassExecutionContext& QueryContext)
 	{
 		const FMassTrafficConstrainedTrailerParameters& TrailerSimulationParams = QueryContext.GetConstSharedFragment<FMassTrafficConstrainedTrailerParameters>();
 

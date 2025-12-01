@@ -12,10 +12,11 @@
 #include "MassEntityView.h"
 #include "MassExecutionContext.h"
 #include "MassTrafficVehicleSimulationTrait.h"
-#include "ZoneGraphSubsystem.h"
 #include "MassTrafficVehicleVolumeTrait.h"
+#include "ZoneGraphSubsystem.h"
 #include "VisualLogger/VisualLogger.h"
-#include "MassExternalSubsystemTraits.h" // KEEP THIS UNDER ALL CIRCUMSTANCES OR ELSE COMPILE WILL FAIL!!!!
+
+struct FMassTrafficVehicleVolumeParameters;
 
 void FindNearbyLanes(const FZoneGraphStorage& Storage, const FBox& Bounds, const FZoneGraphTagFilter TagFilter, TArray<int32>& OutLanes)
 {
@@ -67,7 +68,7 @@ void UMassTrafficFindObstaclesProcessor::Execute(FMassEntityManager& EntityManag
 		// Reset obstacle lists
 		TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("ResetObstacleLists"))
 		
-		ObstacleAvoidingEntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
+		ObstacleAvoidingEntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& QueryContext)
 		{
 			const TArrayView<FMassTrafficObstacleListFragment> ObstacleListFragments = QueryContext.GetMutableFragmentView<FMassTrafficObstacleListFragment>();
 			for (FMassTrafficObstacleListFragment& ObstacleListFragment : ObstacleListFragments)
@@ -83,7 +84,7 @@ void UMassTrafficFindObstaclesProcessor::Execute(FMassEntityManager& EntityManag
 
 		TMap<FMassEntityHandle, TArray<FMassEntityHandle>> ObstacleListsToAdd;
 		
-		ObstacleEntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
+		ObstacleEntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& QueryContext)
 		{
 			const UMassTrafficSubsystem& MassTrafficSubsystem = QueryContext.GetSubsystemChecked<UMassTrafficSubsystem>();
 			const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
@@ -93,12 +94,11 @@ void UMassTrafficFindObstaclesProcessor::Execute(FMassEntityManager& EntityManag
 			const TConstArrayView<FTransformFragment> TransformFragments = QueryContext.GetFragmentView<FTransformFragment>();
 
 			// Loop obstacles and find affected vehicles
-			const int32 NumEntities = QueryContext.GetNumEntities();
-			for (int32 Index = 0; Index < NumEntities; ++Index)
+			for (FMassExecutionContext::FEntityIterator EntityIt = QueryContext.CreateEntityIterator(); EntityIt; ++EntityIt)
 			{
-				FMassEntityHandle ObstacleEntity = QueryContext.GetEntity(Index);
-				const FAgentRadiusFragment& AgentRadiusFragment = AgentRadiusFragments[Index];
-				const FTransformFragment& TransformFragment = TransformFragments[Index];
+				FMassEntityHandle ObstacleEntity = QueryContext.GetEntity(EntityIt);
+				const FAgentRadiusFragment& AgentRadiusFragment = AgentRadiusFragments[EntityIt];
+				const FTransformFragment& TransformFragment = TransformFragments[EntityIt];
 
 				const float AgentWidth = ObstacleParameters ? ObstacleParameters->HalfWidth : AgentRadiusFragment.Radius;
 

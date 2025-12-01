@@ -4,10 +4,9 @@
 
 #include "EngineUtils.h"
 #include "MassCommonUtils.h"
-#include "MassTrafficLaneChange.h"
 #include "MassTrafficLightActor.h"
-#include "MassTrafficParkingSpotActor.h"
-
+#include "MassTrafficUtils.h"
+#include "ZoneGraphQuery.h"
 #include "VisualLogger/VisualLogger.h"
 #if WITH_EDITOR
 #include "Misc/ScopedSlowTask.h"

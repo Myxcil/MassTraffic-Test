@@ -6,14 +6,14 @@
 #include "AIController.h"
 #include "ChaosVehicleMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "MassTrafficPathFinder.h"
+#include "MassTrafficPathFollower.h"
 #include "MassTrafficTrackNearVehicles.h"
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 AMassTrafficControlledVehicle::AMassTrafficControlledVehicle(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	PathFinder = CreateDefaultSubobject<UMassTrafficPathFinder>("PathFinder");
+	PathFollower = CreateDefaultSubobject<UMassTrafficPathFollower>("PathFollower");
 	NearVehicleTracker = CreateDefaultSubobject<UMassTrafficTrackNearVehicles>("NearVehicleTracker");
 
 	UChaosVehicleMovementComponent* MovementComponent = GetVehicleMovement();
@@ -75,7 +75,7 @@ void AMassTrafficControlledVehicle::Destroyed()
 void AMassTrafficControlledVehicle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (PathFinder)
+	if (PathFollower)
 	{
 		NoiseInput += GetVelocity().Length() * DeltaSeconds;
 	}
@@ -130,7 +130,7 @@ bool AMassTrafficControlledVehicle::HasStopped() const
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
-void AMassTrafficControlledVehicle::ResetVehicle()
+void AMassTrafficControlledVehicle::StopAndResetControls()
 {
 	if (Controller)
 	{

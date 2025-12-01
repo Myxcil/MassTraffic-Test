@@ -4,11 +4,9 @@
 
 #include "MassTrafficFragments.h"
 #include "MassTrafficSubsystem.h"
-
 #include "MassProcessor.h"
 #include "MassLODCalculator.h"
 #include "MassLODTickRateController.h"
-
 #include "MassTrafficVehicleSimulationLODProcessor.generated.h"
 
 struct FTrafficSimulationLODLogic : public FLODDefaultLogic
@@ -31,7 +29,7 @@ public:
 
 protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
-	virtual void InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void InitializeInternal(UObject& InOwner, const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	UPROPERTY(EditAnywhere, Category="Processor")

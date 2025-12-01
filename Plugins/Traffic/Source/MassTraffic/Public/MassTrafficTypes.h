@@ -3,18 +3,17 @@
 
 #pragma once
 
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTraffic.h"
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "ZoneGraphTypes.h"
-
 #include "HierarchicalHashGrid2D.h"
 #include "MassEntityView.h"
-
 #include "MassTrafficTypes.generated.h"
 
 #define MASSTRAFFIC_NUM_INLINE_VEHICLE_NEXT_LANES 2 // ..determined to be ~1.4 on average for this game
 #define MASSTRAFFIC_NUM_INLINE_VEHICLE_MERGING_LANES 2 // ..determined to be ~1.3 on average for this game
 #define MASSTRAFFIC_NUM_INLINE_VEHICLE_SPLITTING_LANES 2 // ..determined to be ~1.7 on average for this game
-
 
 
 namespace UE::MassTraffic
@@ -183,27 +182,27 @@ public:
 
 /** A faster, smaller-footprint list for a small number of entities. But will be very slow for larger sizes. */
 template<int32 MAX>
-class TSmallEntityList : public TStaticArray<FMassEntityHandle, MAX, sizeof(FMassEntityHandle)>
+class TSmallEntityList : public TStaticArray<FMassEntityHandle, MAX>
 {
 public:
 	
 	TSmallEntityList() :
-		TStaticArray<FMassEntityHandle, MAX, sizeof(FMassEntityHandle)>()
+		TStaticArray<FMassEntityHandle, MAX>()
 	{
 	}
 
 	explicit TSmallEntityList(const FMassEntityHandle Entity) :
-		TStaticArray<FMassEntityHandle, MAX, sizeof(FMassEntityHandle)>(Entity)
+		TStaticArray<FMassEntityHandle, MAX>(Entity)
 	{
 	}
 
 	explicit TSmallEntityList(TStaticArray<FMassEntityHandle, MAX, sizeof(FMassEntityHandle)>&& Other) :
-		TStaticArray<FMassEntityHandle, MAX, sizeof(FMassEntityHandle)>(Other)
+		TStaticArray<FMassEntityHandle, MAX>(Other)
 	{
 	}
 
 	explicit TSmallEntityList(const TStaticArray<FMassEntityHandle, MAX, sizeof(FMassEntityHandle)>& Other) :
-		TStaticArray<FMassEntityHandle, MAX, sizeof(FMassEntityHandle)>(Other)
+		TStaticArray<FMassEntityHandle, MAX>(Other)
 	{
 	}
 

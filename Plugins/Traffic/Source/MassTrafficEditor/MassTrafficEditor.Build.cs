@@ -25,9 +25,9 @@ public class MassTrafficEditor : ModuleRules
 			{
 				"Core",
 				"Engine",
-				"ZoneGraph",
-				"MassTraffic",
-				//"StructUtils"
+				"MassTraffic", 
+				"Blutility",
+				"ZoneGraph"
 			}
 			);
 			
@@ -39,11 +39,9 @@ public class MassTrafficEditor : ModuleRules
 				"Slate",
 				"SlateCore",
 				"GameplayTasks",
-				"MassCommon",
 				"MassEntity",
 				"RenderCore",
 				"RHI",
-				"Blutility",
 				"ComponentVisualizers",
 				"PropertyEditor",
 				"UnrealEd",

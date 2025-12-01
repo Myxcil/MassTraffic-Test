@@ -4,7 +4,6 @@
 
 #include "MassRepresentationProcessor.h"
 #include "MassTrafficFragments.h"
-
 #include "MassTrafficVehicleVisualizationProcessor.generated.h"
 
 

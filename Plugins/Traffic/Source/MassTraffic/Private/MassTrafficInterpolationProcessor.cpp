@@ -12,7 +12,6 @@
 #include "MassLODUtils.h"
 #include "MassZoneGraphNavigationFragments.h"
 #include "ZoneGraphSubsystem.h"
-#include "MassExternalSubsystemTraits.h"
 
 
 UMassTrafficInterpolationProcessor::UMassTrafficInterpolationProcessor(const FObjectInitializer& ObjectInitializer)
@@ -59,12 +58,11 @@ void UMassTrafficInterpolationProcessor::ConfigureQueries(const TSharedRef<FMass
 
 void UMassTrafficInterpolationProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	EntityQueryNonOffLOD_Conditional.ForEachEntityChunk( Context, [&, World = EntityManager.GetWorld()](FMassExecutionContext& QueryContext)
+	EntityQueryNonOffLOD_Conditional.ForEachEntityChunk(Context, [&, World = EntityManager.GetWorld()](FMassExecutionContext& QueryContext)
 	{
 		const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
 
 		// Get fragment lists
-		const int32 NumEntities = Context.GetNumEntities();
 		const FMassTrafficVehicleSimulationParameters& SimulationParams = QueryContext.GetConstSharedFragment<FMassTrafficVehicleSimulationParameters>();
 		const TConstArrayView<FMassTrafficVehicleControlFragment> VehicleControlFragments = QueryContext.GetFragmentView<FMassTrafficVehicleControlFragment>();
 		const TConstArrayView<FMassZoneGraphLaneLocationFragment> LaneLocationFragments = QueryContext.GetFragmentView<FMassZoneGraphLaneLocationFragment>();
@@ -74,17 +72,17 @@ void UMassTrafficInterpolationProcessor::Execute(FMassEntityManager& EntityManag
 		const TArrayView<FMassTrafficInterpolationFragment> VehicleMovementInterpolationFragments = QueryContext.GetMutableFragmentView<FMassTrafficInterpolationFragment>();
 		const TArrayView<FTransformFragment> TransformFragments = QueryContext.GetMutableFragmentView<FTransformFragment>();
 
-		for (int32 Index = 0; Index < NumEntities; ++Index)
+		for (FMassExecutionContext::FEntityIterator EntityIt = QueryContext.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			const FMassTrafficVehicleControlFragment& VehicleControlFragment = VehicleControlFragments[Index];
-			const FMassZoneGraphLaneLocationFragment& ZoneGraphLaneLocationFragment = LaneLocationFragments[Index];
-			const FMassTrafficLaneOffsetFragment& LaneOffsetFragment = LaneOffsetFragments[Index];
-			const FMassTrafficVehicleLaneChangeFragment& LaneChangeFragment = LaneChangeFragments[Index]; 
-			FMassTrafficInterpolationFragment& VehicleMovementInterpolationFragment = VehicleMovementInterpolationFragments[Index];
-			FTransformFragment& TransformFragment = TransformFragments[Index];
+			const FMassTrafficVehicleControlFragment& VehicleControlFragment = VehicleControlFragments[EntityIt];
+			const FMassZoneGraphLaneLocationFragment& ZoneGraphLaneLocationFragment = LaneLocationFragments[EntityIt];
+			const FMassTrafficLaneOffsetFragment& LaneOffsetFragment = LaneOffsetFragments[EntityIt];
+			const FMassTrafficVehicleLaneChangeFragment& LaneChangeFragment = LaneChangeFragments[EntityIt]; 
+			FMassTrafficInterpolationFragment& VehicleMovementInterpolationFragment = VehicleMovementInterpolationFragments[EntityIt];
+			FTransformFragment& TransformFragment = TransformFragments[EntityIt];
 
 			// Debug
-			const bool bVisLog = DebugFragments.IsEmpty() ? false : DebugFragments[Index].bVisLog > 0;
+			const bool bVisLog = DebugFragments.IsEmpty() ? false : DebugFragments[EntityIt].bVisLog > 0;
 
 			// Get FZoneGraphStorage for lanes
 			check(!VehicleControlFragment.NextLane || VehicleControlFragment.NextLane->LaneHandle.DataHandle == ZoneGraphLaneLocationFragment.LaneHandle.DataHandle);
@@ -143,27 +141,26 @@ void UMassTrafficInterpolationProcessor::Execute(FMassEntityManager& EntityManag
 		}
 	});
 
-	EntityQueryOffLOD_Conditional.ForEachEntityChunk( Context, [&, World = EntityManager.GetWorld()](FMassExecutionContext& QueryContext)
+	EntityQueryOffLOD_Conditional.ForEachEntityChunk(Context, [&, World = EntityManager.GetWorld()](FMassExecutionContext& QueryContext)
 	{
 		const UZoneGraphSubsystem& ZoneGraphSubsystem = QueryContext.GetSubsystemChecked<UZoneGraphSubsystem>();
 
 		// Get fragment lists
-		const int32 NumEntities = Context.GetNumEntities();
 		const TConstArrayView<FMassZoneGraphLaneLocationFragment> LaneLocationFragments = QueryContext.GetFragmentView<FMassZoneGraphLaneLocationFragment>();
 		const TConstArrayView<FMassTrafficVehicleLaneChangeFragment> LaneChangeFragments = QueryContext.GetFragmentView<FMassTrafficVehicleLaneChangeFragment>();
 		const TConstArrayView<FMassTrafficDebugFragment> DebugFragments = QueryContext.GetFragmentView<FMassTrafficDebugFragment>();
 		const TArrayView<FMassTrafficInterpolationFragment> VehicleMovementInterpolationFragments = QueryContext.GetMutableFragmentView<FMassTrafficInterpolationFragment>();
 		const TArrayView<FTransformFragment> TransformFragments = QueryContext.GetMutableFragmentView<FTransformFragment>();
 
-		for (int32 Index = 0; Index < NumEntities; ++Index)
+		for (FMassExecutionContext::FEntityIterator EntityIt = QueryContext.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			const FMassZoneGraphLaneLocationFragment& ZoneGraphLaneLocationFragment = LaneLocationFragments[Index];
-			FMassTrafficInterpolationFragment& VehicleMovementInterpolationFragment = VehicleMovementInterpolationFragments[Index];
-			const FMassTrafficVehicleLaneChangeFragment& LaneChangeFragment = LaneChangeFragments[Index];
-			FTransformFragment& TransformFragment = TransformFragments[Index];
+			const FMassZoneGraphLaneLocationFragment& ZoneGraphLaneLocationFragment = LaneLocationFragments[EntityIt];
+			FMassTrafficInterpolationFragment& VehicleMovementInterpolationFragment = VehicleMovementInterpolationFragments[EntityIt];
+			const FMassTrafficVehicleLaneChangeFragment& LaneChangeFragment = LaneChangeFragments[EntityIt];
+			FTransformFragment& TransformFragment = TransformFragments[EntityIt];
 
 			// Debug
-			const bool bVisLog = DebugFragments.IsEmpty() ? false : (DebugFragments[Index].bVisLog > 0);
+			const bool bVisLog = DebugFragments.IsEmpty() ? false : (DebugFragments[EntityIt].bVisLog > 0);
 
 			// Get FZoneGraphStorage for lanes
 			const FZoneGraphStorage* ZoneGraphStorage = ZoneGraphSubsystem.GetZoneGraphStorage(ZoneGraphLaneLocationFragment.LaneHandle.DataHandle);

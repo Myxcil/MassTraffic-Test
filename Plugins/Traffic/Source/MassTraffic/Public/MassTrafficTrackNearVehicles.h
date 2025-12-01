@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MassEntityTypes.h"
+#include "MassEntityHandle.h"
 #include "Components/ActorComponent.h"
 #include "MassTrafficTrackNearVehicles.generated.h"
 
 
 class UMassActorSubsystem;
 class AMassTrafficControlledVehicle;
-class UMassTrafficPathFinder;
+class UMassTrafficPathFollower;
 class UMassEntitySubsystem;
 
 struct FNearestVehicleInfo

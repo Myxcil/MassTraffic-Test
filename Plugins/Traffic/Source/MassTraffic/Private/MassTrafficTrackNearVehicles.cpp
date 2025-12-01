@@ -10,7 +10,7 @@
 #include "MassTrafficControlledVehicle.h"
 #include "MassTrafficFragments.h"
 #include "MassTrafficMovement.h"
-#include "MassTrafficPathFinder.h"
+#include "MassTrafficPathFollower.h"
 #include "MassTrafficTypes.h"
 #include "MassZoneGraphNavigationFragments.h"
 
@@ -44,13 +44,13 @@ void UMassTrafficTrackNearVehicles::DetermineNearestVehicle()
 {
 	NearestVehicleInfo.Reset();
 
-	UMassTrafficPathFinder* PathFinder = ControlledVehicle->GetPathFinder();
-	check(PathFinder);
+	UMassTrafficPathFollower* PathFollower = ControlledVehicle->GetPathFollower();
+	check(PathFollower);
 	
-	const FZoneGraphLaneLocation& CurrLocation = PathFinder->GetCurrentLocation();
+	const FZoneGraphLaneLocation& CurrLocation = PathFollower->GetCurrentLocation();
 	if (CurrLocation.IsValid())
 	{
-		const FZoneGraphTrafficLaneData* CurrLane = PathFinder->GetCurrentLane();
+		const FZoneGraphTrafficLaneData* CurrLane = PathFollower->GetCurrentLane();
 		if (CurrLane && CurrLane->TailVehicle.IsSet())
 		{
 			const FMassEntityManager& EntityManager = EntitySubsystem->GetEntityManager();

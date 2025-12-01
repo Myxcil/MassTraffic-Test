@@ -4,7 +4,6 @@
 
 #include "MassProcessor.h"
 #include "MassTrafficFragments.h"
-
 #include "MassTrafficPlayerVehicleLODProcessor.generated.h"
 
 /*

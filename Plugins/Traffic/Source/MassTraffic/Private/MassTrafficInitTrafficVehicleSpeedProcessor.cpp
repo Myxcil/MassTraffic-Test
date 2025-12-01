@@ -5,7 +5,9 @@
 #include "MassTrafficMovement.h"
 #include "MassExecutionContext.h"
 #include "MassCommonFragments.h"
+#include "MassTrafficUtils.h"
 #include "MassZoneGraphNavigationFragments.h"
+
 
 UMassTrafficInitTrafficVehicleSpeedProcessor::UMassTrafficInitTrafficVehicleSpeedProcessor()
 	: EntityQuery(*this)
@@ -25,22 +27,21 @@ void UMassTrafficInitTrafficVehicleSpeedProcessor::ConfigureQueries(const TShare
 void UMassTrafficInitTrafficVehicleSpeedProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
 	// Advance agents
-	EntityQuery.ForEachEntityChunk( Context, [&](FMassExecutionContext& QueryContext)
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& QueryContext)
 	{
-		const int32 NumEntities = QueryContext.GetNumEntities();
 		const TConstArrayView<FMassTrafficRandomFractionFragment> RandomFractionFragments = QueryContext.GetFragmentView<FMassTrafficRandomFractionFragment>();
 		const TConstArrayView<FMassTrafficObstacleAvoidanceFragment> AvoidanceFragments = QueryContext.GetFragmentView<FMassTrafficObstacleAvoidanceFragment>();
 		const TConstArrayView<FAgentRadiusFragment> RadiusFragments = QueryContext.GetFragmentView<FAgentRadiusFragment>();
 		const TConstArrayView<FMassZoneGraphLaneLocationFragment> LaneLocationFragments = QueryContext.GetFragmentView<FMassZoneGraphLaneLocationFragment>();
 		const TArrayView<FMassTrafficVehicleControlFragment> VehicleControlFragments = QueryContext.GetMutableFragmentView<FMassTrafficVehicleControlFragment>();
 
-		for (int32 Index = 0; Index < NumEntities; ++Index)
+		for (FMassExecutionContext::FEntityIterator EntityIt = QueryContext.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
-			const FMassTrafficRandomFractionFragment& RandomFractionFragment = RandomFractionFragments[Index];
-			const FAgentRadiusFragment& AgentRadiusFragment = RadiusFragments[Index];
-			const FMassTrafficObstacleAvoidanceFragment& AvoidanceFragment = AvoidanceFragments[Index];
-			const FMassZoneGraphLaneLocationFragment& LaneLocationFragment = LaneLocationFragments[Index];
-			FMassTrafficVehicleControlFragment& VehicleControlFragment = VehicleControlFragments[Index];
+			const FMassTrafficRandomFractionFragment& RandomFractionFragment = RandomFractionFragments[EntityIt];
+			const FAgentRadiusFragment& AgentRadiusFragment = RadiusFragments[EntityIt];
+			const FMassTrafficObstacleAvoidanceFragment& AvoidanceFragment = AvoidanceFragments[EntityIt];
+			const FMassZoneGraphLaneLocationFragment& LaneLocationFragment = LaneLocationFragments[EntityIt];
+			FMassTrafficVehicleControlFragment& VehicleControlFragment = VehicleControlFragments[EntityIt];
 
 			
 			// Compute stable distance based noise

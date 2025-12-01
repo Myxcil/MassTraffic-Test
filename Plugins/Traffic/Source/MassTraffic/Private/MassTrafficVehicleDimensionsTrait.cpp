@@ -17,6 +17,6 @@ void UMassTrafficVehicleDimensionsTrait::BuildTemplate(FMassEntityTemplateBuildC
 	ObstacleConfig.HalfLength = Params.HalfLength;
 	ObstacleConfig.HalfWidth = Params.HalfWidth;
 
-	const FConstSharedStruct ObstacleConfigSharedFragment = EntityManager.GetOrCreateConstSharedFragment(ObstacleConfig);
-	BuildContext.AddConstSharedFragment(ObstacleConfigSharedFragment);
+	const FConstSharedStruct SimulationConfigSharedFragment = EntityManager.GetOrCreateConstSharedFragment(ObstacleConfig);
+	BuildContext.AddConstSharedFragment(SimulationConfigSharedFragment);
 }

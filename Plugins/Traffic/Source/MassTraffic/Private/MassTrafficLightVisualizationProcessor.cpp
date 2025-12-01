@@ -101,7 +101,7 @@ void UMassTrafficLightUpdateCustomVisualizationProcessor::Execute(FMassEntityMan
 		TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("Visual Updates")) 
 
 		// Visualize entities
-		EntityQuery.ForEachEntityChunk( Context, [this](FMassExecutionContext& Context)
+		EntityQuery.ForEachEntityChunk(Context, [this](FMassExecutionContext& Context)
 		{
 			UMassRepresentationSubsystem* RepresentationSubsystem = Context.GetSharedFragment<FMassRepresentationSubsystemSharedFragment>().RepresentationSubsystem;
 			check(RepresentationSubsystem);
@@ -109,18 +109,17 @@ void UMassTrafficLightUpdateCustomVisualizationProcessor::Execute(FMassEntityMan
 
 			const FMassTrafficLightsParameters& TrafficLightsParams = Context.GetConstSharedFragment<FMassTrafficLightsParameters>();
 
-			const int32 NumEntities = Context.GetNumEntities();
 			const TConstArrayView<FMassTrafficIntersectionFragment> TrafficIntersectionFragments = Context.GetFragmentView<FMassTrafficIntersectionFragment>(); 
 			const TConstArrayView<FMassRepresentationLODFragment> VisualizationLODFragments = Context.GetFragmentView<FMassRepresentationLODFragment>();
 			const TArrayView<FMassRepresentationFragment> VisualizationFragments = Context.GetMutableFragmentView<FMassRepresentationFragment>(); 
 			const TArrayView<FMassActorFragment> ActorList = Context.GetMutableFragmentView<FMassActorFragment>();
 
-			for (int32 Index = 0; Index < NumEntities; Index++)
+			for (FMassExecutionContext::FEntityIterator EntityIt = Context.CreateEntityIterator(); EntityIt; ++EntityIt)
 			{
-				const FMassTrafficIntersectionFragment& TrafficIntersectionFragment = TrafficIntersectionFragments[Index]; 
-				const FMassRepresentationLODFragment& VisualizationLODFragment = VisualizationLODFragments[Index];
-				const FMassRepresentationFragment& VisualizationFragment = VisualizationFragments[Index];
-				FMassActorFragment& ActorInfo = ActorList[Index];
+				const FMassTrafficIntersectionFragment& TrafficIntersectionFragment = TrafficIntersectionFragments[EntityIt]; 
+				const FMassRepresentationLODFragment& VisualizationLODFragment = VisualizationLODFragments[EntityIt];
+				const FMassRepresentationFragment& VisualizationFragment = VisualizationFragments[EntityIt];
+				FMassActorFragment& ActorInfo = ActorList[EntityIt];
 
 				AActor* Actor = ActorInfo.GetMutable();
 
@@ -141,7 +140,7 @@ void UMassTrafficLightUpdateCustomVisualizationProcessor::Execute(FMassEntityMan
 							const FMassTrafficLightInstanceCustomData PackedCustomData(TrafficLight.TrafficLightStateFlags);
 
 							// Add instance with custom data 
-							ISMInfo[TrafficLightTypesStaticMeshDescHandle.ToIndex()].AddBatchedTransform(Context.GetEntity(Index)
+							ISMInfo[TrafficLightTypesStaticMeshDescHandle.ToIndex()].AddBatchedTransform(Context.GetEntity(EntityIt)
 								, IntersectionLightTransform, IntersectionLightTransform, VisualizationLODFragment.LODSignificance);
 							ISMInfo[TrafficLightTypesStaticMeshDescHandle.ToIndex()].AddBatchedCustomData(PackedCustomData, VisualizationLODFragment.LODSignificance);
 
@@ -184,18 +183,17 @@ void UMassTrafficLightUpdateCustomVisualizationProcessor::Execute(FMassEntityMan
 	{
 		TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("DebugDisplayVisualization")) 
 
-		EntityQuery.ForEachEntityChunk( Context, [this, InWorld = EntityManager.GetWorld()](FMassExecutionContext& Context)
+		EntityQuery.ForEachEntityChunk(Context, [this, InWorld = EntityManager.GetWorld()](FMassExecutionContext& Context)
 		{
 			const UMassTrafficSubsystem* MassTrafficSubsystem = Context.GetSubsystem<UMassTrafficSubsystem>();
 
-			const int32 NumEntities = Context.GetNumEntities();
 			const TConstArrayView<FTransformFragment> TransformList = Context.GetFragmentView<FTransformFragment>();
 			const TArrayView<FMassRepresentationFragment> VisualizationList = Context.GetMutableFragmentView<FMassRepresentationFragment>();
 
-			for (int EntityIdx = 0; EntityIdx < NumEntities; EntityIdx++)
+			for (FMassExecutionContext::FEntityIterator EntityIt = Context.CreateEntityIterator(); EntityIt; ++EntityIt)
 			{
-				const FTransformFragment& TransformFragment = TransformList[EntityIdx];
-				FMassRepresentationFragment& Visualization = VisualizationList[EntityIdx];
+				const FTransformFragment& TransformFragment = TransformList[EntityIt];
+				FMassRepresentationFragment& Visualization = VisualizationList[EntityIt];
 				const int32 CurrentVisualIdx = static_cast<int32>(Visualization.CurrentRepresentation);
 
 				if (Visualization.CurrentRepresentation != EMassRepresentationType::None || GMassTrafficDebugVisualization >= 2)

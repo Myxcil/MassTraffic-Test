@@ -3,11 +3,11 @@
 #pragma once
 
 #include "MassTrafficProcessorBase.h"
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassTrafficFragments.h"
-
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
 #include "MassRepresentationSubsystem.h"
 #include "MassReplicationTypes.h"
-
 #include "MassTrafficInitTrafficVehiclesProcessor.generated.h"
 
 
@@ -36,8 +36,8 @@ public:
 
 protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
-	virtual void InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager) override;
-	virtual void Execute(FMassEntityManager& EntitySubSystem, FMassExecutionContext& Context) override;
+	virtual void InitializeInternal(UObject& InOwner, const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	void InitNetIds(FMassEntityManager& EntityManager, FMassExecutionContext& Context);
 

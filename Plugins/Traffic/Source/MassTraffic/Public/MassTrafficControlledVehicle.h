@@ -13,7 +13,7 @@ class AAIController;
 class UInputAction;
 class UInputMappingContext;
 class UMassTrafficTrackNearVehicles;
-class UMassTrafficPathFinder;
+class UMassTrafficPathFollower;
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Basic vehicle class used for AI or player controlled vehicles
@@ -40,7 +40,7 @@ public:
 	virtual bool CanBePooled_Implementation() override { return false; }
 	//~ End IMassActorPoolableInterface
 
-	UMassTrafficPathFinder* GetPathFinder() const { return PathFinder; }
+	UMassTrafficPathFollower* GetPathFollower() const { return PathFollower; }
 	UMassTrafficTrackNearVehicles* GetNearVehicleTracker() const { return NearVehicleTracker; }
 	float GetAgentRadius() const { return AgentRadius; }
 	float GetNoiseInput() const { return NoiseInput; }
@@ -48,12 +48,12 @@ public:
 	float GetSpeed() const;
 	virtual bool HasStopped() const;
 
-	virtual void ResetVehicle();
+	void StopAndResetControls();
 
 protected:
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UMassTrafficPathFinder> PathFinder;
+	TObjectPtr<UMassTrafficPathFollower> PathFollower;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMassTrafficTrackNearVehicles> NearVehicleTracker;
 

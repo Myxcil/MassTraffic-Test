@@ -4,10 +4,8 @@
 
 #include "MassTrafficFragments.h"
 #include "MassTrafficSubsystem.h"
-
 #include "MassVisualizationLODProcessor.h"
 #include "MassLODCollectorProcessor.h"
-
 #include "MassTrafficVehicleVisualizationLODProcessor.generated.h"
 
 struct FTrafficViewerLODLogic : public FLODDefaultLogic
@@ -29,7 +27,7 @@ public:
 	UMassTrafficVehicleVisualizationLODProcessor();
 
 protected:
-	virtual void InitializeInternal(UObject& Owner, const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void InitializeInternal(UObject& InOwner, const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 

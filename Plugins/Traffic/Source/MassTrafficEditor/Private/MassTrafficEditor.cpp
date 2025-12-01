@@ -7,8 +7,8 @@
 #include "MassTrafficIntersectionComponentVisualizer.h"
 #include "MassTrafficParkingSpotComponent.h"
 #include "MassTrafficParkingSpotComponentVisualizer.h"
-#include "MassTrafficPathFinder.h"
-#include "MassTrafficPathFinderVisualizer.h"
+#include "MassTrafficPathFollower.h"
+#include "MassTrafficPathFollowerVisualizer.h"
 #include "MassTrafficTrackNearVehicles.h"
 #include "MassTrafficTrackNearVehiclesVisualizer.h"
 #include "UnrealEdGlobals.h"
@@ -32,7 +32,7 @@ FAutoConsoleVariableRef CVarMassTrafficEditorDebug(
 
 void FMassTrafficEditorModule::StartupModule()
 {
-	RegisterComponentVisualizer(UMassTrafficPathFinder::StaticClass()->GetFName(), MakeShareable(new FMassTrafficPathFinderVisualizer));
+	RegisterComponentVisualizer(UMassTrafficPathFollower::StaticClass()->GetFName(), MakeShareable(new FMassTrafficPathFollowerVisualizer));
 	RegisterComponentVisualizer(UMassTrafficTrackNearVehicles::StaticClass()->GetFName(), MakeShareable(new FMassTrafficTrackNearVehiclesVisualizer));
 	RegisterComponentVisualizer(UMassTrafficParkingSpotComponent::StaticClass()->GetFName(), MakeShareable(new FMassTrafficParkingSpotComponentVisualizer));
 	RegisterComponentVisualizer(UMassTrafficIntersectionComponent::StaticClass()->GetFName(), MakeShareable(new FMassTrafficIntersectionComponentVisualizer));

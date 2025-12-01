@@ -2,16 +2,18 @@
 
 #pragma once
 
-#include "MassTrafficFragments.h"
-
 #include "Components/PrimitiveComponent.h"
+#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
+#include "MassTrafficFragments.h"
 #include "MassEntityTypes.h"
+#endif // UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_6
+#include "MassEntityHandle.h"
 #include "ZoneGraphTypes.h"
-
 #include "MassTrafficFieldComponent.generated.h"
 
 class UMassTrafficFieldOperationBase;
 class UMassTrafficSubsystem;
+struct FZoneGraphTrafficLaneData;
 
 UENUM(BlueprintType)
 enum class EMassTrafficFieldInclusionMode : uint8
