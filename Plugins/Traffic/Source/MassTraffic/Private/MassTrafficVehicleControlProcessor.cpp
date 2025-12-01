@@ -403,13 +403,13 @@ void UMassTrafficVehicleControlProcessor::SimpleVehicleControl(
 		VariedSpeedLimit,
 		MassTrafficSettings->IdealTimeToNextVehicleRange,
 		MassTrafficSettings->MinimumDistanceToNextVehicleRange,
-		/*NextVehicleAvoidanceBrakingPower*/3.0f, // @todo Expose
+		MassTrafficSettings->NextVehicleAvoidanceBrakingPower,
 		MassTrafficSettings->ObstacleAvoidanceBrakingTimeRange,
 		MassTrafficSettings->MinimumDistanceToObstacleRange,
-		/*ObstacleAvoidanceBrakingPower*/0.5f, // @todo Expose
+		MassTrafficSettings->ObstacleAvoidanceBrakingPower,
 		MassTrafficSettings->StopSignBrakingTime,
 		MassTrafficSettings->StoppingDistanceRange,
-		/*StopSignBrakingPower*/0.5f, // @todo Expose
+		MassTrafficSettings->StopSignBrakingPower,
 		bMustStopAtLaneExit
 		#if WITH_MASSTRAFFIC_DEBUG
 			, bVisLog
@@ -737,13 +737,13 @@ void UMassTrafficVehicleControlProcessor::PIDVehicleControl(
 		VariedSpeedLimit,
 		MassTrafficSettings->IdealTimeToNextVehicleRange,
 		MassTrafficSettings->MinimumDistanceToNextVehicleRange,
-		/*NextVehicleAvoidanceBrakingPower*/3.0f, // @todo Expose
+		MassTrafficSettings->NextVehicleAvoidanceBrakingPower,
 		MassTrafficSettings->ObstacleAvoidanceBrakingTimeRange,
 		MassTrafficSettings->MinimumDistanceToObstacleRange,
-		/*ObstacleAvoidanceBrakingPower*/0.5f, // @todo Expose
+		MassTrafficSettings->ObstacleAvoidanceBrakingPower,
 		MassTrafficSettings->StopSignBrakingTime,
 		MassTrafficSettings->StoppingDistanceRange,
-		/*StopSignBrakingPower*/0.5f, // @todo Expose
+		MassTrafficSettings->StopSignBrakingPower,
 		bMustStopAtLaneExit
 		#if WITH_MASSTRAFFIC_DEBUG
 			, bVisLog
